@@ -9,8 +9,8 @@ Array.prototype.add = function (n, card) { for (var i=0; i<n; i++) { this.push(c
 // (4) Viper
 
 var tradeCards = [];
-var p1 = {};
-var p2 = {};
+var p1 = {name:"P1", discard:[], combat:0};
+var p2 = {name:"P2", discard:[], combat:0};
 
 //Star Empire
 tradeCards.add(3, {name:'Imperial Fighter', faction:'Star Empire'});
@@ -68,20 +68,73 @@ tradeCards.add(1, {name:'Brain World', faction:'Machine Cult'});
 
 p1.deck = initPlayerDeck();
 p2.deck = initPlayerDeck();
+p1.authority = 50;
+p2.authority = 50;
 
 function initPlayerDeck() {
 	var deck = [];
-	deck.add(8, {name:'Scout'});
-	deck.add(2, {name:'Viper'});
+	deck.add(8, {name:'Scout', trade:1});
+	deck.add(2, {name:'Viper', combat:1});
 	return Shuffle.shuffle({deck: deck});
 }
 
 var tradeDeck = Shuffle.shuffle({deck: tradeCards});
 var tradeRow = tradeDeck.draw(5);
 
-var p1hand = p1.deck.draw(5);
-var p2hand = p2.deck.draw(5);
 
-console.log("P1: ", p1hand);
-console.log("P2: ", p2hand);
-console.log("TR: ", tradeRow);
+p1.hand = p1.deck.draw(3);
+p2.hand = p2.deck.draw(5);
+
+function play(p, notp) {
+	console.log(p.name, "'s turn!");
+
+	//Main
+	p.hand.forEach(function(card) {
+		if (card.trade) { p.trade += card.trade; }
+		if (card.authority) { p.authority += card.authority; }
+		if (card.combat) {p.combat += card.combat; }
+	});
+	console.log(p.hand.map(function(card) { return card.name; }));
+	console.log("T:", p.trade, "A:", p.authority, "C:", p.combat);
+	//Main Combat
+	if (p.combat) {
+		notp.authority -= p.combat;
+		console.log(p.name, " attacks ", notp.name, " for ", p.combat, " authority.");
+		p.combat = 0;
+	}
+	//Main Trade
+	p.trade = 0;
+	//Discard
+	p.discard = p.discard.concat(p.hand);
+	//Draw
+	p.hand = p.deck.draw(Math.min(5, p.deck.cards.length)) || [];
+	if (p.hand.length < 5)
+	{
+		console.log("Reshuffling ", p.name);
+		p.deck.putOnTopOfDeck(p.discard);
+		p.discard = [];
+		p.deck.shuffle();
+		p.hand = p.hand.concat(p.deck.draw(5-p.hand.length));
+	}
+}
+
+var turnlimit = 3;
+var turns =0;
+while(p1.authority > 0 && p2.authority > 0) // && turns < turnlimit)
+{
+	play(p1, p2);
+	if (p2.authority <=0) {
+		console.log("P1 wins!");
+		break;
+	}
+	play(p2, p1);
+	if (p1.authority <= 0) {
+		console.log("P2 wins!");
+		break;
+	}
+	turns++;
+}
+
+console.log("Final score - P1:", p1.authority, " P2:", p2.authority);
+
+//console.log("TR: ", tradeRow);
