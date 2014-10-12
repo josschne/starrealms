@@ -6,6 +6,7 @@ module.exports = {
 	runGame: runGame,
 	playCard: playCard,
 	initPlayer: initPlayer,
+	initTrade: initTrade,
 	getFactionsInPlay: getFactionsInPlay,
 	processCombat: processCombat,
 	processTrade: processTrade
@@ -137,12 +138,18 @@ function play(p, notp, trade) {
 	p.hand = drawCards(p,5);
 }
 
+function initTrade()
+{
+	var trade = {hand:[], deck:Shuffle.shuffle({deck: require('./tradeCards.js').getTradeCards()})};
+	return trade;
+}
+
 function runGame() 
 {
 	//Initializations
 	var p1 = initPlayer("P1");
 	var p2 = initPlayer("P2");
-	var trade = {deck:Shuffle.shuffle({deck: require('./tradeCards.js').getTradeCards()})};
+	var trade = initTrade();
 
 	//Begin Game
 	p1.hand = p1.deck.draw(3);

@@ -95,13 +95,15 @@ describe("Trade processing", function() {
 	it("buys the cheapest card available", function() {
 		p = main.initPlayer();
 		p.trade = 5;
+		trade = main.initTrade();
 		trade.row = [ {cost:3}, {cost:4}, {cost:5} ];
 
 		main.processTrade(p, trade);
 
-		expect(p.hand.length).toEqual(1);
+		expect(p.discard.length).toEqual(1);
+		expect(p.discard[0].cost).toEqual(3);
 	});
-})
+});
 
 describe("A player", function() {
 	it("can calculate the factions in play", function() {

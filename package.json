@@ -1,0 +1,26 @@
+{
+  "name": "starrealms",
+  "version": "0.1.0",
+  "description": "Star Realms Simulator",
+  "main": "main.js",
+  "dependencies": {
+    "growl": "~1.8.1",
+    "readline-sync": "~0.4.8",
+    "shuffle": "~0.2.1",
+    "lodash": "~2.4.1",
+    "extendify": "~0.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "jasmine-node spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/josschne/starrealms.git"
+  },
+  "author": "Joe Schneider",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/josschne/starrealms/issues"
+  }
+}
