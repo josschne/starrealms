@@ -1,6 +1,12 @@
 var Shuffle = require('shuffle');
 var Readline = require('readline-sync');
 
+//Add functions here to expose them outside of the module
+module.exports = {
+	runGame: runGame,
+	playCommon: playCommon
+}
+
 Array.prototype.add = function (n, card) { for (var i=0; i<n; i++) { this.push(card); }};
 
 function initPlayer(name)
@@ -40,7 +46,7 @@ function playCommon(card, p) {
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
 	if (card.hasOwnProperty('combat')) {p.combat += card.combat; }
 	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }	
-	if (getFactionsInPlay(p).indexOf(card.faction) > 0 && card.hasOwnProperty('allyAbilities')) { console.log(card.name, " gets ally bonus of ", card.allyAbilities); playCommon(card.allyAbilities, p); }
+	if (card.hasOwnProperty('faction') && getFactionsInPlay(p).indexOf(card.faction) > 0 && card.hasOwnProperty('allyAbilities')) { console.log(card.name, " gets ally bonus of ", card.allyAbilities); playCommon(card.allyAbilities, p); }
 }
 
 function playBase(card, p) {
@@ -118,9 +124,7 @@ function play(p, notp, trade) {
 	p.hand = drawCards(p,5);
 }
 
-
-
-module.exports.runGame = function () 
+function runGame() 
 {
 	//Initializations
 	var p1 = initPlayer("P1");

@@ -18,6 +18,6 @@ Develop
 
 Test specs are located in the spec folder.  They are written in Jasmine and can be executed with jasmine-node.
 ```
-npm install jasmine-node -g
+sudo npm install jasmine-node -g
 jasmine-node spec
 ```
