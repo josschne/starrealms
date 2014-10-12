@@ -4,14 +4,18 @@ var Readline = require('readline-sync');
 //Add functions here to expose them outside of the module
 module.exports = {
 	runGame: runGame,
-	playCommon: playCommon
+	playCard: playCard,
+	initPlayer: initPlayer,
+	getFactionsInPlay: getFactionsInPlay,
+	processCombat: processCombat,
+	processTrade: processTrade
 }
 
 Array.prototype.add = function (n, card) { for (var i=0; i<n; i++) { this.push(card); }};
 
 function initPlayer(name)
 {
-	return {name:name, discard:[], bases:[], combat:0, trade:0, deck:initPlayerDeck(), authority:50};
+	return {name:name, discard:[], bases:[], combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[]};
 }
 
 function initPlayerDeck() {
@@ -46,7 +50,7 @@ function playCommon(card, p) {
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
 	if (card.hasOwnProperty('combat')) {p.combat += card.combat; }
 	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }	
-	if (card.hasOwnProperty('faction') && getFactionsInPlay(p).indexOf(card.faction) > 0 && card.hasOwnProperty('allyAbilities')) { console.log(card.name, " gets ally bonus of ", card.allyAbilities); playCommon(card.allyAbilities, p); }
+	if (card.hasOwnProperty('faction') && getFactionsInPlay(p).indexOf(card.faction) >= 0 && card.hasOwnProperty('allyAbilities')) { /*console.log(card.name, " gets ally bonus of ", card.allyAbilities);*/ playCommon(card.allyAbilities, p); }
 }
 
 function playBase(card, p) {
@@ -55,7 +59,7 @@ function playBase(card, p) {
 
 function playCard(card, p) {
 	playCommon(card, p);
-	if (card.hasOwnProperty('base') || card.hasOwnProperty('outpost')) { moveCard(card, p.hand, p.bases); }
+	if (card.hasOwnProperty('base') || card.hasOwnProperty('outpost')) { moveCard(card, p.hand, p.bases); playBase(card, p); }
 }
 
 function moveCard(card, src, dst) {
@@ -63,25 +67,7 @@ function moveCard(card, src, dst) {
 	src.splice(src.indexOf(card), 1);
 }
 
-function play(p, notp, trade) {
-	//console.log(p.name, "'s turn!");
-
-	//Main
-	//console.log("HAND: ", p.hand.map(function(card) { return card.name; }));
-	//console.log("BASES: ", p.bases.map(function(card) { return card.name; }));
-
-	p.bases.forEach(function(card) {
-		playBase(card, p);
-	})
-	p.hand.forEach(function(card) {
-		playCard(card, p);
-	});
-
-	//console.log("T:", p.trade, "A:", p.authority, "C:", p.combat);
-	
-	//console.log("TRADE: ", trade.row.map(function(card) { return card.name; }));
-	
-	//Main Combat
+function processCombat(p, notp) {
 	while (p.combat > 0) {
 		if (notp.bases[0]) {
 			var outposts = notp.bases.filter(function(b) { return b.hasOwnProperty('outpost'); }).sort(function(a, b) { return a.outpost-b.outpost; });
@@ -104,9 +90,10 @@ function play(p, notp, trade) {
 		notp.authority -= p.combat;
 		p.combat = 0;
 	}
+}
 
-
-	//Main Trade
+function processTrade(p, trade)
+{
 	var toBuy = trade.row.filter(function(card) { return (card.cost <= p.trade)});
 	while(toBuy.length > 0 && trade.deck.length > 0)
 	{
@@ -118,6 +105,32 @@ function play(p, notp, trade) {
 		toBuy = trade.row.filter(function(card) { return (card.cost <= p.trade)});
 	}
 	p.trade = 0;
+}
+
+function play(p, notp, trade) {
+	//console.log(p.name, "'s turn!");
+
+	//Main
+	//console.log("HAND: ", p.hand.map(function(card) { return card.name; }));
+	//console.log("BASES: ", p.bases.map(function(card) { return card.name; }));
+
+	p.bases.forEach(function(card) {
+		playBase(card, p);
+	})
+	p.hand.forEach(function(card) {
+		playCard(card, p);
+	});
+
+	//console.log("T:", p.trade, "A:", p.authority, "C:", p.combat);
+	
+	//console.log("TRADE: ", trade.row.map(function(card) { return card.name; }));
+	
+	//Main Combat
+	processCombat(p, notp);
+
+	//Main Trade
+	processTrade(p, trade);
+
 	//Discard
 	p.discard = p.discard.concat(p.hand);
 	//Draw
