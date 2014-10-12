@@ -92,9 +92,9 @@ describe("Combat processing", function() {
 });
 
 describe("Trade processing", function() {
-	it("buys the cheapest card available", function() {
+	it("buys a card", function() {
 		p = main.initPlayer();
-		p.trade = 5;
+		p.trade = 3;
 		trade = main.initTrade();
 		trade.row = [ {cost:3}, {cost:4}, {cost:5} ];
 
