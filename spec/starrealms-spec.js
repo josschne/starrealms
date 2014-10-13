@@ -47,6 +47,18 @@ describe("A played card", function() {
 		expect(p.trade).toEqual(1);
 	});
 
+	it ("triggers other cards' ally abilities", function() {
+		cardA = {faction:'A', allyAbilities:{trade:1}};
+		cardB = {faction:'A', allyAbilities:{trade:1}};
+
+		p.hand = [ cardA, cardB ];
+
+		main.playCard(cardA, p);
+		main.playCard(cardB, p);
+
+		expect(p.trade).toEqual(2);
+	})
+
 	it("is added to the bases if it is a base or an outpost", function() {
 		card = {base:5};
 
@@ -89,6 +101,13 @@ describe("Combat processing", function() {
 		main.processCombat(p, notp);
 		expect(notp.authority).toEqual(48);
 	});
+
+	it("stops combat if the opponent has an outpost with more health than the player has combat", function() {
+		p.combat = 3;
+		notp.bases = [ {outpost: 4} ];
+		main.processCombat(p, notp);
+		expect(notp.authority).toEqual(50);
+	})
 });
 
 describe("Trade processing", function() {

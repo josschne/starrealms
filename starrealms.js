@@ -77,7 +77,7 @@ function processCombat(p, notp) {
 				if (outposts[0].outpost <= p.combat) {
 					moveCard(outposts[0], notp.bases, notp.discard);
 					p.combat -= outposts[0].outpost;
-					console.log(p.name, " destroys outpost ", outposts[0].name);
+					//console.log(p.name, " destroys outpost ", outposts[0].name);
 					continue;
 				}
 				else {
