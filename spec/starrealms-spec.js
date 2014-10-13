@@ -30,6 +30,7 @@ describe("A played card", function() {
 
 	it("draws a new card when instructed", function() {
 		card = {drawCard:1};
+		p.hand = [ card ];
 		main.playCard(card, p);
 
 		expect(p.hand.length).toEqual(1);
@@ -38,7 +39,7 @@ describe("A played card", function() {
 	it("triggers its own ally abilities when appropriate", function() {
 		cardA = {faction:'A', allyAbilities:{trade:1}};
 		cardB = {faction:'B', allyAbilities:{trade:1}};
-		p.hand = [ {faction:'A'} ];
+		p.inPlay = [ {faction:'A'} ];
 
 		//Only one of the two cards' ally abilities should be triggered
 		main.playCard(cardA, p);
@@ -47,7 +48,7 @@ describe("A played card", function() {
 		expect(p.trade).toEqual(1);
 	});
 
-	it ("triggers other cards' ally abilities", function() {
+	it("triggers other cards' ally abilities", function() {
 		cardA = {faction:'A', allyAbilities:{trade:1}};
 		cardB = {faction:'A', allyAbilities:{trade:1}};
 
@@ -57,6 +58,19 @@ describe("A played card", function() {
 		main.playCard(cardB, p);
 
 		expect(p.trade).toEqual(2);
+	})
+
+	it("triggers ally abilities after drawing a card", function() {
+		cardA = {faction:'A', drawCard:1, allyAbilities:{trade:1}};
+		cardB = {faction:'A'};
+
+		p.hand = [ cardA ];
+		p.deck.putOnTopOfDeck(cardB);
+
+		main.playCard(cardA, p);
+		main.playCard(cardB, p);
+
+		expect(p.trade).toEqual(1);
 	})
 
 	it("is added to the bases if it is a base or an outpost", function() {
@@ -127,9 +141,9 @@ describe("Trade processing", function() {
 describe("A player", function() {
 	it("can calculate the factions in play", function() {
 		var p = main.initPlayer();
-		p.hand = [ {faction:'A'} ];
+		p.inPlay = [ {faction:'A'} ];
 
-		expect(main.getFactionsInPlay(p)).toEqual(['A']);
+		expect(main.getFactionCount(p)).toEqual({'A':1});
 	});
 });
 

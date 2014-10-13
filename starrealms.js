@@ -7,7 +7,7 @@ module.exports = {
 	playCard: playCard,
 	initPlayer: initPlayer,
 	initTrade: initTrade,
-	getFactionsInPlay: getFactionsInPlay,
+	getFactionCount: getFactionCount,
 	processCombat: processCombat,
 	processTrade: processTrade
 }
@@ -16,7 +16,7 @@ Array.prototype.add = function (n, card) { for (var i=0; i<n; i++) { this.push(c
 
 function initPlayer(name)
 {
-	return {name:name, discard:[], bases:[], combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[]};
+	return {name:name, discard:[], bases:[], inPlay:[], combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[]};
 }
 
 function initPlayerDeck() {
@@ -31,27 +31,46 @@ function drawCards(p, n)
 	var cards = [].concat(p.deck.draw(Math.min(n, p.deck.cards.length)) || []);
 	if (cards.length < n)
 	{
-		//console.log("Reshuffling ", p.name);
+		if (n > p.discard.length) { console.log("Oh noes. Discard pile isn't big enough!"); process.exit(0); }
 		p.deck.putOnTopOfDeck(p.discard);
 		p.discard = [];
 		p.deck.shuffle();
+
 		cards = cards.concat(p.deck.draw(n-cards.length));
 	}
 	return cards;
 }
 
-function getFactionsInPlay(p) {
-	var cardsInPlay = p.hand.concat(p.bases);
-	var factions = cardsInPlay.map(function(c){return c.faction}).filter(function(c){ return c; });
-	return factions.filter(function(faction,index,self) { return self.indexOf(faction) === index;});
+function getFactionCount(p) {
+	var cardsInPlay = p.inPlay.concat(p.bases);
+	var factionCount = cardsInPlay.reduce(function(factionCount, c){ factionCount[c.faction] = (factionCount[c.faction] || 0) + 1; return factionCount; }, {});
+	return factionCount;
+}
+
+function processAllyAbilities(card, p) {
+	var factionCount = getFactionCount(p);
+	Object.keys(factionCount).forEach(function(faction) {
+		//Process only this card if ally abilities already activated
+		if (factionCount[faction] >= 2 && card.faction == faction && card.hasOwnProperty('allyAbilities')) {
+			playCommon(card.allyAbilities, p);
+		}
+		//Process all cards if ally abilities were just activated
+		if (factionCount[faction] == 1 && card.faction == faction) {
+			var factionCardsWithAbilities = p.inPlay.concat(p.bases).concat(card).filter(function(c) { return c.faction == faction && c.hasOwnProperty('allyAbilities');});
+
+			factionCardsWithAbilities.forEach(function(c) {
+				playCommon(c.allyAbilities, p);
+			})
+		}
+	});
 }
 
 function playCommon(card, p) {
 	if (card.hasOwnProperty('trade')) { p.trade += card.trade; }
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
-	if (card.hasOwnProperty('combat')) {p.combat += card.combat; }
-	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }	
-	if (card.hasOwnProperty('faction') && getFactionsInPlay(p).indexOf(card.faction) >= 0 && card.hasOwnProperty('allyAbilities')) { /*console.log(card.name, " gets ally bonus of ", card.allyAbilities);*/ playCommon(card.allyAbilities, p); }
+	if (card.hasOwnProperty('combat')) { p.combat += card.combat; }
+	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }
+	processAllyAbilities(card, p);
 }
 
 function playBase(card, p) {
@@ -60,7 +79,12 @@ function playBase(card, p) {
 
 function playCard(card, p) {
 	playCommon(card, p);
-	if (card.hasOwnProperty('base') || card.hasOwnProperty('outpost')) { moveCard(card, p.hand, p.bases); playBase(card, p); }
+
+	if (card.hasOwnProperty('base') || card.hasOwnProperty('outpost')) {
+		moveCard(card, p.hand, p.bases);
+	} else {
+		moveCard(card, p.hand, p.inPlay);
+	}
 }
 
 function moveCard(card, src, dst) {
@@ -118,9 +142,9 @@ function play(p, notp, trade) {
 	p.bases.forEach(function(card) {
 		playBase(card, p);
 	})
-	p.hand.forEach(function(card) {
-		playCard(card, p);
-	});
+	while(p.hand.length > 0) {
+		playCard(p.hand[0], p);
+	};
 
 	//console.log("T:", p.trade, "A:", p.authority, "C:", p.combat);
 	
@@ -133,7 +157,8 @@ function play(p, notp, trade) {
 	processTrade(p, trade);
 
 	//Discard
-	p.discard = p.discard.concat(p.hand);
+	p.discard = p.discard.concat(p.inPlay);
+	p.inPlay = [];
 	//Draw
 	p.hand = drawCards(p,5);
 }
