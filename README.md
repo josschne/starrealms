@@ -20,7 +20,6 @@ Not Yet Working
 Opponent Discards
 Scrap Abilities
 Destroy Base
-"Or" actions
 Fleet HQ's "All Ships Get 1 Combat"
 Embassy Yacht's "If at least two bases"
 Next Ship to Top

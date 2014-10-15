@@ -1,5 +1,6 @@
 var Shuffle = require('shuffle');
 var Readline = require('readline-sync');
+var log = require('winston');
 
 //Add functions here to expose them outside of the module
 module.exports = {
@@ -70,7 +71,8 @@ function playCommon(card, p) {
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
 	if (card.hasOwnProperty('combat')) { p.combat += card.combat; }
 	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }
-	processAllyAbilities(card, p);
+	if (card.hasOwnProperty('or')) { playCommon(card.or[0], p); }
+	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p); }
 }
 
 function playBase(card, p) {
@@ -101,7 +103,7 @@ function processCombat(p, notp) {
 				if (outposts[0].outpost <= p.combat) {
 					moveCard(outposts[0], notp.bases, notp.discard);
 					p.combat -= outposts[0].outpost;
-					//console.log(p.name, " destroys outpost ", outposts[0].name);
+					log.debug(p.name, " destroys outpost ", outposts[0].name);
 					continue;
 				}
 				else {
@@ -111,7 +113,7 @@ function processCombat(p, notp) {
 			}
 		}
 
-		//console.log(p.name, " attacks ", notp.name, " for ", p.combat, " authority.");
+		log.debug(p.name, " attacks ", notp.name, " for ", p.combat, " authority.");
 		notp.authority -= p.combat;
 		p.combat = 0;
 	}
@@ -133,11 +135,11 @@ function processTrade(p, trade)
 }
 
 function play(p, notp, trade) {
-	//console.log(p.name, "'s turn!");
+	log.debug(p.name, "'s turn!");
 
 	//Main
-	//console.log("HAND: ", p.hand.map(function(card) { return card.name; }));
-	//console.log("BASES: ", p.bases.map(function(card) { return card.name; }));
+	log.debug("HAND: ", p.hand.map(function(card) { return card.name; }));
+	log.debug("BASES: ", p.bases.map(function(card) { return card.name; }));
 
 	p.bases.forEach(function(card) {
 		playBase(card, p);
@@ -146,9 +148,9 @@ function play(p, notp, trade) {
 		playCard(p.hand[0], p);
 	};
 
-	//console.log("T:", p.trade, "A:", p.authority, "C:", p.combat);
+	log.debug("T:", p.trade, "A:", p.authority, "C:", p.combat);
 	
-	//console.log("TRADE: ", trade.row.map(function(card) { return card.name; }));
+	log.debug("TRADE: ", trade.row.map(function(card) { return card.name; }));
 	
 	//Main Combat
 	processCombat(p, notp);
@@ -187,14 +189,13 @@ function runGame()
 		if (p2.authority <=0) {
 			break;
 		}
-		//Readline.question('Continue:');
+
 		play(p2, p1, trade);
 		if (p1.authority <= 0) {
 			break;
 		}
-		//Readline.question('Continue:');
 	}
 
-	console.log("Final score - P1:", p1.authority, " P2:", p2.authority);
+	log.info("Final score - P1:", p1.authority, " P2:", p2.authority);
 	return [p1.authority, p2.authority];
 }

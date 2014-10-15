@@ -80,6 +80,15 @@ describe("A played card", function() {
 
 		expect(p.bases.length).toEqual(1);
 	});
+
+	it("handles 'or' conditions", function() {
+		card = {or:[{trade:1}, {combat:2}]};
+
+		main.playCard(card, p);
+
+		expect(p.trade).toEqual(1);
+		expect(p.combat).toEqual(0);
+	});
 });
 
 describe("Combat processing", function() {

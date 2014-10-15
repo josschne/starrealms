@@ -4,11 +4,12 @@
   "description": "Star Realms Simulator",
   "main": "main.js",
   "dependencies": {
+    "extendify": "~0.1.0",
     "growl": "~1.8.1",
+    "lodash": "~2.4.1",
     "readline-sync": "~0.4.8",
     "shuffle": "~0.2.1",
-    "lodash": "~2.4.1",
-    "extendify": "~0.1.0"
+    "winston": "^0.8.1"
   },
   "devDependencies": {},
   "scripts": {

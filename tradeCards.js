@@ -23,9 +23,9 @@ function getTradeCards() {
 	tradeCards.add(1, {name:'Trade Escort', faction:'Trade Federation', cost:5, authority:4, combat:4, allyAbilities:{drawCard:1}});
 	tradeCards.add(1, {name:'Flagship', faction:'Trade Federation', cost:6, combat:5, drawCard:1, allyAbilities:{authority:5}});
 	tradeCards.add(1, {name:'Command Ship', faction:'Trade Federation', cost:8, authority:4, combat:5, drawCard:2, allyAbilities:{destroyBase:1}});
-	tradeCards.add(2, {name:'Trading Post', faction:'Trade Federation', cost:3, or:{authority:1, trade:1}, scrapAbilities:{combat:3}, outpost:4});
-	tradeCards.add(2, {name:'Barter World', faction:'Trade Federation', cost:4, or:{authority:2, trade:2}, scrapAbilities:{combat:5}, base:4});
-	tradeCards.add(1, {name:'Defense Center', faction:'Trade Federation', cost:5, or:{authority:3, combat:2}, allyAbilities:{combat:2}, outpost:5});
+	tradeCards.add(2, {name:'Trading Post', faction:'Trade Federation', cost:3, or:[{authority:1}, {trade:1}], scrapAbilities:{combat:3}, outpost:4});
+	tradeCards.add(2, {name:'Barter World', faction:'Trade Federation', cost:4, or:[{authority:2}, {trade:2}], scrapAbilities:{combat:5}, base:4});
+	tradeCards.add(1, {name:'Defense Center', faction:'Trade Federation', cost:5, or:[{authority:3}, {combat:2}], allyAbilities:{combat:2}, outpost:5});
 	tradeCards.add(1, {name:'Port of Call', faction:'Trade Federation', cost:6, trade:3, scrapAbilities:{drawCard:1, destroyBase:1}, outpost:6});
 	tradeCards.add(1, {name:'Central Office', faction:'Trade Federation', cost:7, trade:2, nextShipToTop:1, allyAbilities:{drawCard:1}, base:6});
 
@@ -40,13 +40,13 @@ function getTradeCards() {
 	tradeCards.add(1, {name:'Mothership', faction:'The Blob', cost:7, combat:6, drawCard:1, allyAbilities:{drawCard:1}});
 	tradeCards.add(3, {name:'Blob Wheel', faction:'The Blob', cost:3, combat:1, scrapAbilities:{trade:3}, base:5});
 	tradeCards.add(1, {name:'The Hive', faction:'The Blob', cost:5, combat:3, allyAbilities:{drawCard:1}, base:5});
-	tradeCards.add(1, {name:'Blob World', faction:'The Blob', cost:8, or:{combat:5, drawCardForEachBlob:1}, base:7});
+	tradeCards.add(1, {name:'Blob World', faction:'The Blob', cost:8, or:[{combat:5}, {drawCardForEachBlob:1}], base:7});
 
 	// Machine Cult
 	tradeCards.add(3, {name:'Trade Bot', faction:'Machine Cult', cost:1, trade:1, scrapCard:1, allyAbilities:{combat:2}});
 	tradeCards.add(3, {name:'Missile Bot', faction:'Machine Cult', cost:2, combat:2, scrapCard:1, allyAbilities:{combat:2}});
 	tradeCards.add(3, {name:'Supply Bot', faction:'Machine Cult', cost:3, trade:2, scrapCard:1, allyAbilities:{combat:2}});
-	tradeCards.add(2, {name:'Patrol Mech', faction:'Machine Cult', cost:4, or:{trade:3, combat:5}, allyAbilities:{scrapCard:1}});
+	tradeCards.add(2, {name:'Patrol Mech', faction:'Machine Cult', cost:4, or:[{trade:3}, {combat:5}], allyAbilities:{scrapCard:1}});
 	tradeCards.add(1, {name:'Stealth Needle', faction:'Machine Cult', cost:4, copyShip:1});
 	tradeCards.add(1, {name:'Battle Mech', faction:'Machine Cult', cost:5, combat:4, scrapCard:1, allyAbilities:{drawCard:1}});
 	tradeCards.add(1, {name:'Missile Mech', faction:'Machine Cult', cost:6, combat:6, destroyBase:1, allyAbilities:{drawCard:1}});
