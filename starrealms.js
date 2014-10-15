@@ -185,13 +185,11 @@ function runGame()
 	{
 		play(p1, p2, trade);
 		if (p2.authority <=0) {
-			console.log("P1 wins!");
 			break;
 		}
 		//Readline.question('Continue:');
 		play(p2, p1, trade);
 		if (p1.authority <= 0) {
-			console.log("P2 wins!");
 			break;
 		}
 		//Readline.question('Continue:');
