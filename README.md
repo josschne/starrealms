@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/josschne/starrealms.svg?branch=master)](https://travis-ci.org/josschne/starrealms)
+
 starrealms
 ==========
 
