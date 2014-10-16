@@ -1,6 +1,7 @@
 var Shuffle = require('shuffle');
 var Readline = require('readline-sync');
 var log = require('winston');
+var strategy = require('./strategy');
 
 //Add functions here to expose them outside of the module
 module.exports = {
@@ -71,7 +72,7 @@ function playCommon(card, p) {
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
 	if (card.hasOwnProperty('combat')) { p.combat += card.combat; }
 	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }
-	if (card.hasOwnProperty('or')) { playCommon(card.or[0], p); }
+	if (card.hasOwnProperty('or')) { playCommon(strategy.orStrategy(card), p); }
 	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p); }
 }
 
@@ -124,11 +125,11 @@ function processTrade(p, trade)
 	var toBuy = trade.row.filter(function(card) { return (card.cost <= p.trade)});
 	while(toBuy.length > 0 && trade.deck.length > 0)
 	{
-		//console.log(toBuy.map(function(card) { return card.name; }));
-		//console.log(p.name, " trades ", toBuy[0].cost, " for ", toBuy[0].name);
-		moveCard(toBuy[0], trade.row, p.discard);
+		var cardToBuy = strategy.buyStrategy(toBuy);
+		log.debug(p.name, " trades ", cardToBuy.cost, " for ", cardToBuy.name);
+		moveCard(cardToBuy, trade.row, p.discard);
 		trade.row.push(trade.deck.draw(1));
-		p.trade -= toBuy[0].cost;
+		p.trade -= cardToBuy.cost;
 		toBuy = trade.row.filter(function(card) { return (card.cost <= p.trade)});
 	}
 	p.trade = 0;
