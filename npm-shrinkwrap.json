@@ -1,0 +1,64 @@
+{
+  "name": "starrealms",
+  "version": "0.1.0",
+  "dependencies": {
+    "extendify": {
+      "version": "0.1.0",
+      "from": "extendify@"
+    },
+    "growl": {
+      "version": "1.8.1",
+      "from": "growl@",
+      "resolved": "https://registry.npmjs.org/growl/-/growl-1.8.1.tgz"
+    },
+    "lodash": {
+      "version": "2.4.1",
+      "from": "lodash@"
+    },
+    "readline-sync": {
+      "version": "0.4.8",
+      "from": "readline-sync@",
+      "resolved": "https://registry.npmjs.org/readline-sync/-/readline-sync-0.4.8.tgz"
+    },
+    "shuffle": {
+      "version": "0.2.1",
+      "from": "shuffle@",
+      "resolved": "https://registry.npmjs.org/shuffle/-/shuffle-0.2.1.tgz"
+    },
+    "winston": {
+      "version": "0.8.1",
+      "from": "winston@",
+      "resolved": "https://registry.npmjs.org/winston/-/winston-0.8.1.tgz",
+      "dependencies": {
+        "async": {
+          "version": "0.2.10",
+          "from": "async@0.2.10"
+        },
+        "colors": {
+          "version": "0.6.2",
+          "from": "colors@0.6.2"
+        },
+        "cycle": {
+          "version": "1.0.3",
+          "from": "cycle@1.0.x",
+          "resolved": "https://registry.npmjs.org/cycle/-/cycle-1.0.3.tgz"
+        },
+        "eyes": {
+          "version": "0.1.8",
+          "from": "eyes@0.1.x",
+          "resolved": "https://registry.npmjs.org/eyes/-/eyes-0.1.8.tgz"
+        },
+        "pkginfo": {
+          "version": "0.3.0",
+          "from": "pkginfo@0.3.x",
+          "resolved": "https://registry.npmjs.org/pkginfo/-/pkginfo-0.3.0.tgz"
+        },
+        "stack-trace": {
+          "version": "0.0.9",
+          "from": "stack-trace@0.0.x",
+          "resolved": "https://registry.npmjs.org/stack-trace/-/stack-trace-0.0.9.tgz"
+        }
+      }
+    }
+  }
+}
