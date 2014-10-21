@@ -1,10 +1,10 @@
 var main = require("../starrealms");
 
 describe("A played card", function() {
-	var p;
 
 	beforeEach(function() {
 		p = main.initPlayer();
+		notp = main.initPlayer();
 	});
 
 	it("increases the player's trade", function() {
@@ -89,6 +89,14 @@ describe("A played card", function() {
 		expect(p.trade).toEqual(1);
 		expect(p.combat).toEqual(0);
 	});
+
+	it("handles opponent discard", function() {
+		card = {opponentDiscard:1};
+
+		main.playCard(card, p, notp);
+
+		expect(notp.discarding).toEqual(1);
+	});
 });
 
 describe("Combat processing", function() {
@@ -144,6 +152,22 @@ describe("Trade processing", function() {
 
 		expect(p.discard.length).toEqual(1);
 		expect(p.discard[0].cost).toEqual(3);
+	});
+});
+
+describe("A turn", function() {
+	beforeEach(function(){
+		p = main.initPlayer();
+	});
+
+
+	it("will not play cards that need to be discarded", function() {
+		p.hand = [{}, {}, {}, {}, {}];  //A hand with 5 cards
+		p.discarding = 1;
+
+		main.processPreTurn(p);
+
+		expect(p.discard.length).toBe(1);
 	});
 });
 

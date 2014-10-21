@@ -17,7 +17,6 @@ node main.js
 
 Not Yet Working
 ===============
-- Opponent Discards
 - Scrap Abilities
 - Destroy Base
 - Fleet HQ's "All Ships Get 1 Combat"

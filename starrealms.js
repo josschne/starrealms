@@ -3,6 +3,7 @@ var Readline = require('readline-sync');
 var log = require('winston');
 var strategy = require('./strategy');
 
+
 //Add functions here to expose them outside of the module
 module.exports = {
 	runGame: runGame,
@@ -11,14 +12,15 @@ module.exports = {
 	initTrade: initTrade,
 	getFactionCount: getFactionCount,
 	processCombat: processCombat,
-	processTrade: processTrade
+	processTrade: processTrade,
+	processPreTurn: processPreTurn,
 }
 
 Array.prototype.add = function (n, card) { for (var i=0; i<n; i++) { this.push(card); }};
 
 function initPlayer(name)
 {
-	return {name:name, discard:[], bases:[], inPlay:[], combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[]};
+	return {name:name, discard:[], bases:[], inPlay:[], discarding:0, combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[]};
 }
 
 function initPlayerDeck() {
@@ -54,34 +56,35 @@ function processAllyAbilities(card, p) {
 	Object.keys(factionCount).forEach(function(faction) {
 		//Process only this card if ally abilities already activated
 		if (factionCount[faction] >= 2 && card.faction == faction && card.hasOwnProperty('allyAbilities')) {
-			playCommon(card.allyAbilities, p);
+			playCommon(card.allyAbilities, p, notp);
 		}
 		//Process all cards if ally abilities were just activated
 		if (factionCount[faction] == 1 && card.faction == faction) {
 			var factionCardsWithAbilities = p.inPlay.concat(p.bases).concat(card).filter(function(c) { return c.faction == faction && c.hasOwnProperty('allyAbilities');});
 
 			factionCardsWithAbilities.forEach(function(c) {
-				playCommon(c.allyAbilities, p);
+				playCommon(c.allyAbilities, p, notp);
 			})
 		}
 	});
 }
 
-function playCommon(card, p) {
+function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('trade')) { p.trade += card.trade; }
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
 	if (card.hasOwnProperty('combat')) { p.combat += card.combat; }
 	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }
-	if (card.hasOwnProperty('or')) { playCommon(strategy.orStrategy(card), p); }
+	if (card.hasOwnProperty('or')) { playCommon(strategy.orStrategy(card), p, notp); }
 	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p); }
+	if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
 }
 
-function playBase(card, p) {
-	playCommon(card, p);
+function playBase(card, p, notp) {
+	playCommon(card, p, notp);
 }
 
-function playCard(card, p) {
-	playCommon(card, p);
+function playCard(card, p, notp) {
+	playCommon(card, p, notp);
 
 	if (card.hasOwnProperty('base') || card.hasOwnProperty('outpost')) {
 		moveCard(card, p.hand, p.bases);
@@ -135,6 +138,14 @@ function processTrade(p, trade)
 	p.trade = 0;
 }
 
+function processPreTurn(p)
+{
+	for(i=0; i<p.discarding; i++)
+	{
+		moveCard(p.hand[0], p.hand, p.discard);
+	}	
+}
+
 function play(p, notp, trade) {
 	log.debug(p.name, "'s turn!");
 
@@ -142,11 +153,15 @@ function play(p, notp, trade) {
 	log.debug("HAND: ", p.hand.map(function(card) { return card.name; }));
 	log.debug("BASES: ", p.bases.map(function(card) { return card.name; }));
 
+	//Pre-turn
+	processPreTurn(p);
+
+	//Play Hand
 	p.bases.forEach(function(card) {
-		playBase(card, p);
+		playBase(card, p, notp);
 	})
 	while(p.hand.length > 0) {
-		playCard(p.hand[0], p);
+		playCard(p.hand[0], p, notp);
 	};
 
 	log.debug("T:", p.trade, "A:", p.authority, "C:", p.combat);
