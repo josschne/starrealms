@@ -31,6 +31,10 @@ Not Yet Working
 - Machine Base's "Draw then Scrap"
 - Brain World's "Scrap and Draw"
 
+TODO
+=====
+11858 - Seed for "special" game where trade row is too expensive for starting hands to buy anything
+
 
 Develop
 =======

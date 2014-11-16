@@ -103,7 +103,6 @@ describe("Combat processing", function() {
 	beforeEach(function(){
 		p = main.initPlayer();
 		notp = main.initPlayer();
-		main.logger = {debug: function() {}};
 	});
 
 	it("handles a simple no-bases combat scenario", function() {
