@@ -97,6 +97,30 @@ describe("A played card", function() {
 
 		expect(notp.discarding).toEqual(1);
 	});
+
+	it("handles stealth needle", function() {
+		stealthNeedle = {copyShip:1};
+		inPlayCard = {combat:2}
+
+		p.hand = [ stealthNeedle ];
+		p.inPlay = [ inPlayCard ];
+
+		main.playCard(stealthNeedle, p, notp);
+
+		expect(p.combat).toEqual(2)
+	});
+
+});
+
+describe("Defending against stupid strategy", function() {
+
+	it("ignores undefined cards", function() {
+		p = main.initPlayer();
+		notp = main.initPlayer();
+
+		main.playCommon(undefined, p, notp);
+	});
+
 });
 
 describe("Combat processing", function() {

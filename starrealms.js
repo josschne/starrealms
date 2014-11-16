@@ -15,6 +15,7 @@ module.exports = {
 	processCombat: processCombat,
 	processTrade: processTrade,
 	processPreTurn: processPreTurn,
+	playCommon: playCommon,
 }
 
 
@@ -75,6 +76,8 @@ function processAllyAbilities(card, p, notp) {
 }
 
 function playCommon(card, p, notp) {
+	if (!card)
+		return
 	if (card.hasOwnProperty('trade')) { p.trade += card.trade; }
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
 	if (card.hasOwnProperty('combat')) { p.combat += card.combat; }
@@ -82,6 +85,7 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('or')) { playCommon(p.strategy.orStrategy(card), p, notp); }
 	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p, notp); }
 	if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
+	if (card.hasOwnProperty('copyShip')) {playCommon(p.strategy.copyShipStrategy(p.inPlay), p, notp); }
 }
 
 function playBase(card, p, notp) {
