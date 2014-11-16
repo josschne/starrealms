@@ -1,0 +1,59 @@
+Design Notes
+
+Player
+	Begins a turn
+		RULE: Must discard as directed by other players' played cards
+		RULE: Must draw 5 cards - unless this is the first turn of the game in which case 3 are drawn
+		RULE: Existing base combat/trade and some special abilities are invoked ("All Ships Combat")
+	Attacks a base
+		RULE: Attacker must have enough combat - unless "Destroy base" is invoked
+	Attacks a player
+		RULE: Player cannot be attacked if outpost is present
+	Plays a card
+		RULE: Ally abilities unlocked when at least two allies cards are played (including bases) - unless "Ally to all" is invoked
+		RULE: Some cards invoke special abilities (Destroy base, Copy ship, Next ship to top, Draw card, Next ship no cost, Scrap from trade row, Scrap from hand/discard, Ally to all, Draw then scrap, Scrap and draw)
+		RULE: Some cards invoke special abilities only when certain criteria are met (At least two bases, Draw card for each blob )
+		RULE: Some cards have an "OR" criteria which must be decided
+		RULE: Special abilities are optional, including "OR" abilities
+			In practice - this is most often applied to the scrapping abilities.
+	Invokes base special abilities
+
+	Scraps a card
+		RULE: Card must have scrap ability to scrap it - unless Scrap form hand/discard is invoked
+		RULE: Some cards invoke special abilities when scrapped (Draw card, Opponent discard, Destroy base)
+	Buys a card
+		RULE: Must have enough trade to buy card - unless "Next ship no cost" is invoked
+		RULE: Card must go to discard pile - unless "Next ship to top" is invoked
+	Finishes turn
+		RULE: Must put cards from hand into discard
+
+
+Strategy:
+		//Or, Scrap, Destroy base strategies can return undefined to signal no action should be taken.
+		//Copy ship and Select Card must return valid choices (undefined results in game forfeiture)
+	var playStrategies = {
+		or:   						pick the first option
+		scrapFromHandOrDiscard:     scrap scout or viper in discard
+		scrapFromTradeRow:			don't do anything
+		destroyBase:				destroy first base when available
+		copyShip:					copy most powerful ship
+		selectCardToPlay:  			play any cards that affect hand first, then play all others
+		selectCardToBuy:   			buy most expensive card that player can afford
+		selectCardsToScrap:  		scrap viper or scout from discard pile when possible
+	}
+
+	var turnStrategy = function() {
+		//beginTurn();  //Called automatically
+	
+		playBases(playStrategies);
+
+		playCards(playStrategies);
+
+		//scrapCards(selectCardsToScrap());
+
+		buyCards(selectCardToBuy());
+
+		attack();
+
+		//endTurn();  //Called automatically
+	}

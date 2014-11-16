@@ -160,7 +160,6 @@ describe("A turn", function() {
 		p = main.initPlayer();
 	});
 
-
 	it("will not play cards that need to be discarded", function() {
 		p.hand = [{}, {}, {}, {}, {}];  //A hand with 5 cards
 		p.discarding = 1;
