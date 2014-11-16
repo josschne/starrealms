@@ -7,10 +7,10 @@ var log = new (winston.Logger)({
     ]
 });
 
-process.on('SIGINT', function() {
-    log.error('Caught interrupt signal');
-    process.exit(1);
-});
+//process.on('SIGINT', function() {
+//    log.error('Caught interrupt signal');
+//    process.exit(1);
+//});
 
 var simulationCount = 2000;
 var winCount = [0, 0];

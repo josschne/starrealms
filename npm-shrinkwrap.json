@@ -4,58 +4,62 @@
   "dependencies": {
     "extendify": {
       "version": "0.1.0",
-      "from": "extendify@"
+      "from": "extendify@0.1.0",
+      "resolved": "https://registry.npmjs.org/extendify/-/extendify-0.1.0.tgz"
     },
     "growl": {
       "version": "1.8.1",
-      "from": "growl@",
+      "from": "https://registry.npmjs.org/growl/-/growl-1.8.1.tgz",
       "resolved": "https://registry.npmjs.org/growl/-/growl-1.8.1.tgz"
     },
     "lodash": {
       "version": "2.4.1",
-      "from": "lodash@"
+      "from": "lodash@2.4.1",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-2.4.1.tgz"
     },
     "readline-sync": {
       "version": "0.4.8",
-      "from": "readline-sync@",
+      "from": "https://registry.npmjs.org/readline-sync/-/readline-sync-0.4.8.tgz",
       "resolved": "https://registry.npmjs.org/readline-sync/-/readline-sync-0.4.8.tgz"
     },
     "shuffle": {
-      "version": "0.2.1",
-      "from": "shuffle@",
-      "resolved": "https://registry.npmjs.org/shuffle/-/shuffle-0.2.1.tgz"
+      "version": "0.2.2",
+      "from": "shuffle@0.2.2",
+      "resolved": "https://registry.npmjs.org/shuffle/-/shuffle-0.2.2.tgz"
     },
     "winston": {
       "version": "0.8.1",
-      "from": "winston@",
+      "from": "https://registry.npmjs.org/winston/-/winston-0.8.1.tgz",
       "resolved": "https://registry.npmjs.org/winston/-/winston-0.8.1.tgz",
       "dependencies": {
         "async": {
           "version": "0.2.10",
-          "from": "async@0.2.10"
+          "from": "async@0.2.10",
+          "resolved": "https://registry.npmjs.org/async/-/async-0.2.10.tgz"
         },
         "colors": {
           "version": "0.6.2",
-          "from": "colors@0.6.2"
+          "from": "colors@0.6.2",
+          "resolved": "https://registry.npmjs.org/colors/-/colors-0.6.2.tgz"
         },
         "cycle": {
           "version": "1.0.3",
-          "from": "cycle@1.0.x",
+          "from": "https://registry.npmjs.org/cycle/-/cycle-1.0.3.tgz",
           "resolved": "https://registry.npmjs.org/cycle/-/cycle-1.0.3.tgz"
         },
         "eyes": {
           "version": "0.1.8",
-          "from": "eyes@0.1.x",
+          "from": "https://registry.npmjs.org/eyes/-/eyes-0.1.8.tgz",
           "resolved": "https://registry.npmjs.org/eyes/-/eyes-0.1.8.tgz"
         },
         "pkginfo": {
           "version": "0.3.0",
-          "from": "pkginfo@0.3.x",
+          "from": "https://registry.npmjs.org/pkginfo/-/pkginfo-0.3.0.tgz",
           "resolved": "https://registry.npmjs.org/pkginfo/-/pkginfo-0.3.0.tgz"
         },
         "stack-trace": {
           "version": "0.0.9",
-          "from": "stack-trace@0.0.x",
+          "from": "https://registry.npmjs.org/stack-trace/-/stack-trace-0.0.9.tgz",
           "resolved": "https://registry.npmjs.org/stack-trace/-/stack-trace-0.0.9.tgz"
         }
       }
