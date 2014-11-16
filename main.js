@@ -9,8 +9,8 @@ var Starrealms = require("./starrealms");
 var winston = require('winston');
 var log = new (winston.Logger)({  
     transports: [
-        new (winston.transports.Console)({ level: 'info' }),
-        new (winston.transports.File)({ filename: 'game.log', level: 'debug', json:false})
+        new (winston.transports.Console)({ level: 'debug' }),
+        //new (winston.transports.File)({ filename: 'game.log', level: 'debug', json:false})
     ]
 });
 
@@ -19,10 +19,10 @@ var log = new (winston.Logger)({
 //    process.exit(1);
 //});
 
-var simulationCount = 98000;
+var simulationCount = 200000;
 var winCount = [0, 0];
 for (var s=0; s<simulationCount; s++) {
-    seed = s+2000;
+    seed = 11858;
     log.info('Seed: ', seed);
 	var result = Starrealms.runGame(log);
 	if (result[0] > result[1]) {

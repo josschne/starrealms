@@ -2,6 +2,9 @@ var Shuffle = require('shuffle');
 var Readline = require('readline-sync');
 var moveCard = require('./card_utils').moveCard;
 
+var winston = require('winston');
+module.log = new (winston.Logger)({});
+
 //Add functions here to expose them outside of the module
 module.exports = {
 	runGame: runGame,
@@ -73,12 +76,12 @@ function processAllyAbilities(card, p, notp) {
 
 function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('trade')) { p.trade += card.trade; }
-	//if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
+	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
 	if (card.hasOwnProperty('combat')) { p.combat += card.combat; }
-	//if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }
-	//if (card.hasOwnProperty('or')) { playCommon(p.strategy.orStrategy(card), p, notp); }
-	//if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p, notp); }
-	//if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
+	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }
+	if (card.hasOwnProperty('or')) { playCommon(p.strategy.orStrategy(card), p, notp); }
+	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p, notp); }
+	if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
 }
 
 function playBase(card, p, notp) {
@@ -203,7 +206,10 @@ function initTrade()
 
 function runGame(log) 
 {
-	module.log = log;
+	if (log)
+	{
+		module.log = log;
+	}
 
 	//Initializations
 	var p1 = initPlayer("P1", require('./strategy'));
