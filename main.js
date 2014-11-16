@@ -1,3 +1,10 @@
+var seed = 1;
+
+Math.random = function myRandom() {
+    var x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
 var Starrealms = require("./starrealms");
 var winston = require('winston');
 var log = new (winston.Logger)({  
@@ -12,9 +19,11 @@ var log = new (winston.Logger)({
 //    process.exit(1);
 //});
 
-var simulationCount = 2000;
+var simulationCount = 98000;
 var winCount = [0, 0];
 for (var s=0; s<simulationCount; s++) {
+    seed = s+2000;
+    log.info('Seed: ', seed);
 	var result = Starrealms.runGame(log);
 	if (result[0] > result[1]) {
 		winCount[0]++;
