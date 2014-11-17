@@ -26,7 +26,6 @@ Not Yet Working
 - Next Ship No Cost
 - Draw Card for Each Blob
 - Scrap a Card
-- Mech World's "Ally for All"
 - Machine Base's "Draw then Scrap"
 - Brain World's "Scrap and Draw"
 

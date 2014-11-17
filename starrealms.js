@@ -51,10 +51,27 @@ function drawCards(p, n)
 	return cards;
 }
 
+function createOrIncrement(obj, value) 
+{
+    obj[value] = (obj[value] || 0) + 1;
+}
+
 function getFactionCount(p) {
 	var cardsInPlay = p.inPlay.concat(p.bases);
-	var factionCount = cardsInPlay.reduce(function(factionCount, c){ factionCount[c.faction] = (factionCount[c.faction] || 0) + 1; return factionCount; }, {});
-	return factionCount;
+	var factionCount = cardsInPlay.reduce(function(factionCount, c){ 
+        if (c.hasOwnProperty('allyAll')) {
+            createOrIncrement(factionCount, 'Machine Cult');
+            createOrIncrement(factionCount, 'The Blob');
+            createOrIncrement(factionCount, 'Trade Federation');
+            createOrIncrement(factionCount, 'Star Empire');
+        }
+        else
+        {
+            createOrIncrement(factionCount, c.faction);
+        }
+        return factionCount; 
+    }, {});
+    return factionCount;
 }
 
 function processAllyAbilities(card, p, notp) {
@@ -65,7 +82,7 @@ function processAllyAbilities(card, p, notp) {
 			playCommon(card.allyAbilities, p, notp);
 		}
 		//Process all cards if ally abilities were just activated
-		if (factionCount[faction] == 1 && card.faction == faction) {
+		if (factionCount[faction] == 1 && (card.faction == faction || card.hasOwnProperty('allyAll'))) {
 			var factionCardsWithAbilities = p.inPlay.concat(p.bases).concat(card).filter(function(c) { return c.faction == faction && c.hasOwnProperty('allyAbilities');});
 
 			factionCardsWithAbilities.forEach(function(c) {
@@ -95,6 +112,8 @@ function playBase(card, p, notp) {
 function playCard(card, p, notp) {
 	playCommon(card, p, notp);
 
+    //Note - Ally processing relies on the card being played to not be in
+    // the bases or inPlay deck until after playCommon is called
 	if (card.hasOwnProperty('base') || card.hasOwnProperty('outpost')) {
 		moveCard(card, p.hand, p.bases);
 	} else {

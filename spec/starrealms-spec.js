@@ -112,6 +112,28 @@ describe("A played card", function() {
 
 });
 
+describe("Mech World", function() {
+    it("is an ally for every faction", function() {
+        p = main.initPlayer();
+		notp = main.initPlayer();
+        
+        allyCard1 = { faction:"The Blob",         allyAbilities:{combat:1}};
+        allyCard2 = { faction:"Star Empire",      allyAbilities:{combat:1}};
+        allyCard3 = { faction:"Trade Federation", allyAbilities:{combat:1}};
+        allyCard4 = { faction:"Machine Cult",     allyAbilities:{combat:1}};
+        mechWorld = { faction:"Machine Cult",     allyAll:1 };
+        p.hand = [allyCard1, allyCard2, mechWorld, allyCard3, allyCard4];
+        
+        main.playCard(allyCard1, p, notp);
+        main.playCard(allyCard2, p, notp);
+        main.playCard(mechWorld, p, notp);
+        main.playCard(allyCard3, p, notp);
+        main.playCard(allyCard4, p, notp);
+        
+        expect(p.combat).toEqual(4);        
+    });
+});
+
 describe("Defending against stupid strategy", function() {
 
 	it("ignores undefined cards", function() {
