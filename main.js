@@ -13,25 +13,37 @@ var log = new (winston.Logger)({
     ]
 });
 
+var args = process.argv.slice(2);
+
+var strategies = [];
+args.forEach(function(strategy, index) {
+	strategies.push({name:strategy+index, strategy:require(strategy), wins:0})
+});
+
 var startTime = Date.now();
-var simulationCount = 5000;
-var winCount = [0, 0];
+var simulationCount = 30000;
+
 for (var s=0; s<simulationCount; s++) {
     seed = s;
-    log.info('Seed: ', seed);
-	var result = Starrealms.runGame(); // Pass log into runGame() to enable debug outpu
+    if (seed % 100 == 0)
+     { log.info('Seed: ', seed); }
+    
+    var p1 = strategies[s%strategies.length];
+    var p2 = strategies[(s+1)%strategies.length];
+
+	var result = Starrealms.runGame(undefined, p1.strategy, p2.strategy); // Pass log into runGame() to enable debug output
+
 	if (result[0] > result[1]) {
-		winCount[0]++;
-	}
-	else 
-	{
-		winCount[1]++;
+		p1.wins++;
+	} else {
+		p2.wins++;
 	}
 }
 var endTime = Date.now();
 
 console.log("Simulation complete");
-console.log("Win count: ", winCount);
-console.log("Ratio (p1/p2): ", winCount[0]/winCount[1]);
+console.log(p1.name," wins:", p1.wins);
+console.log(p2.name," wins:", p2.wins);
+console.log("Ratio (p1/p2): ", p1.wins/p2.wins);
 console.log("Total time: ", endTime-startTime, "ms");
 console.log("Games/sec: ", simulationCount / (endTime-startTime) * 1000);

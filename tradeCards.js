@@ -11,7 +11,7 @@ function getTradeCards() {
 	add(3, {name:'Survey Ship', faction:'Star Empire', cost:3, trade:1, drawCard:1, scrapAbilities:{opponentDiscard:1}});
 	add(1, {name:'Battlecruiser', faction:'Star Empire', cost:6, combat:5, drawCard:1, allyAbilities:{opponentDiscard:1}, scrapAbilities:{drawCard:1, destroyBase:1}});
 	add(1, {name:'Dreadnaught', faction:'Star Empire', cost:7, combat:7, drawCard:1, scrapAbilities:{combat:5}});
-	add(2, {name:'Recycling Station', faction:'Star Empire', cost:4, trade:1, outpost:4});
+	add(2, {name:'Recycling Station', faction:'Star Empire', cost:4, or:[{trade:1}, {discardThenDraw:2}], outpost:4});
 	add(2, {name:'Space Station', faction:'Star Empire', cost:4, combat:2, allyAbilities:{combat:2}, scrapAbilities:{trade:4}, outpost:4});
 	add(1, {name:'War World', faction:'Star Empire', cost:5, combat:3, allyAbilities:{combat:4}, outpost:4});
 	add(1, {name:'Royal Redoubt', faction:'Star Empire', cost:6, combat:3, allyAbilities:{opponentDiscard:1}, outpost:6});
@@ -56,7 +56,7 @@ function getTradeCards() {
 	add(1, {name:'Mech World', faction:'Machine Cult', cost:5, allyAll:1, outpost:6});
 	add(1, {name:'Junkyard', faction:'Machine Cult', cost:6, scrapCard:1, outpost:5});
 	add(1, {name:'Machine Base', faction:'Machine Cult', cost:7, drawThenScrap:1, outpost:6});
-	add(1, {name:'Brain World', faction:'Machine Cult', cost:8, scrapAndDraw:2, outpost:6});
+	add(1, {name:'Brain World', faction:'Machine Cult', cost:8, scrapThenDraw:2, outpost:6});
 
 	return tradeCards;
 }

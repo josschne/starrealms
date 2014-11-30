@@ -169,6 +169,16 @@ describe("A played card", function() {
 
 });
 
+describe("Drawing cards", function() {
+	it("returns undefined if no cards are available to draw", function() {
+		p = main.initPlayer();
+		p.deck = [];
+		p.discard = [];
+
+		expect(main.drawCards(p, 1)).toEqual(undefined);
+	});
+})
+
 describe("Mech World", function() {
     it("is an ally for every faction", function() {
         p = main.initPlayer();
@@ -297,6 +307,6 @@ describe("A player", function() {
 
 describe("A game", function() {
 	it("can be played without crashing", function() {
-		main.runGame();
+		main.runGame(undefined, require('../strategy'), require('../strategy'));
 	});
 });

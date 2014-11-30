@@ -2,12 +2,12 @@ var Shuffle = require('shuffle');
 var Readline = require('readline-sync');
 var moveCard = require('./card_utils').moveCard;
 
-var winston = require('winston');
-module.log = new (winston.Logger)({});
+module.log = {info:function() {}};
 
 //Add functions here to expose them outside of the module
 module.exports = {
 	runGame: runGame,
+	drawCards: drawCards,
     play: play,
     playCard: playCard,
     playBase: playBase,
@@ -41,16 +41,22 @@ function initPlayerDeck() {
 
 function drawCards(p, n)
 {
+	module.log.info("Drawing ", n, " cards. ", p.deck.length, " left in the deck. ", p.discard.length, " in the discard. ");
+	if (p.deck.length == 0 && p.discard.length == 0) { 
+		module.log.info("Player was DECKED!");
+		return undefined;
+	}
+
 	var cards = [].concat(p.deck.draw(Math.min(n, p.deck.length)) || []);
 	if (cards.length < n)
 	{
-        if (n > p.discard.length) { console.log("Oh noes. Discard pile isn't big enough!"); process.exit(0); }
 		p.deck.putOnTopOfDeck(p.discard);
 		p.discard = [];
 		p.deck.shuffle();
 
 		cards = cards.concat(p.deck.draw(n-cards.length));
 	}
+	
 	return cards;
 }
 
@@ -109,17 +115,26 @@ function processScrapCard(card, p) {
 	}
 }
 
+function processCopyShip(p, notp) {
+	var shipToCopy = p.strategy.copyShipStrategy(p.inPlay);
+
+	if (shipToCopy) {
+		module.log.info("Copy Ship: "+shipToCopy.name);
+		playCommon(shipToCopy, p, notp);
+	}
+}
+
 function playCommon(card, p, notp) {
 	if (!card)
 		return
 	if (card.hasOwnProperty('trade')) { p.trade += card.trade; module.log.info(card.name, " +", card.trade, " Trade (Trade:", p.trade,")"); }
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; module.log.info(card.name, " +", card.authority, " Authority (Authority:", p.authority,")");}
 	if (card.hasOwnProperty('combat')) { p.combat += card.combat; module.log.info(card.name, " +", card.combat, " Combat (Combat:", p.combat,")");}
-	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); module.log.info(card.name, " Draw ", card.drawCard)}
+	if (card.hasOwnProperty('drawCard')) { var drawnCards = drawCards(p, card.drawCard); if (drawnCards) {p.hand = p.hand.concat(drawnCards);} module.log.info(card.name, " Draw ", card.drawCard)}
     if (card.hasOwnProperty('or')) { card.or.forEach(function(a) { a.name = "Or: " + card.name }); playCommon(p.strategy.orStrategy(card), p, notp); }
 	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p, notp); }
 	if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
-	if (card.hasOwnProperty('copyShip')) {playCommon(p.strategy.copyShipStrategy(p.inPlay), p, notp); }
+	if (card.hasOwnProperty('copyShip')) { processCopyShip(p, notp); }
 	if (card.hasOwnProperty('scrapCard')) { processScrapCard(p.strategy.scrapCardStrategy(p), p); }
 }
 
@@ -257,7 +272,7 @@ function initTrade()
 	return trade;
 }
 
-function runGame(log) 
+function runGame(log, strategy1, strategy2) 
 {
 	if (log)
 	{
@@ -265,8 +280,8 @@ function runGame(log)
 	}
 
 	//Initializations
-	var p1 = initPlayer("P1", require('./strategy'));
-	var p2 = initPlayer("P2", require('./strategy'));
+	var p1 = initPlayer("P1", strategy1);
+	var p2 = initPlayer("P2", strategy2);
 	var trade = initTrade();
 
 	//Begin Game

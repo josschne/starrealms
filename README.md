@@ -19,13 +19,15 @@ Not Yet Working
 ===============
 - Destroy Base
 - Next Ship to Top
-- Scrap Trade Row
-- Next Ship No Cost
+- Recycling Station's "Discard Then Draw"
+- Battle Pod / Blob Destroyer's "Scrap Trade Row"
+- Blob Carrier's "Next Ship No Cost"
 - Blob World's "Draw Card for Each Blob"
 - Fleet HQ's "All Ships Get 1 Combat"
 - Embassy Yacht's "If at least two bases"
 - Machine Base's "Draw then Scrap"
-- Brain World's "Scrap and Draw"
+- Brain World's "Scrap then Draw"
+- Double-check that Stealth Needle is properly implementing "Stealth Needle has that ship's faction, in addition to Machine Cult"
 
 
 Develop

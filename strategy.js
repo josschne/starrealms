@@ -20,7 +20,7 @@ function buyStrategy(toBuy)
 
 function copyShipStrategy(inPlayCards)
 {
-	return inPlayCards[0]
+	return inPlayCards[0];
 }
 
 function scrapStrategy(card)
