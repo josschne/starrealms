@@ -203,8 +203,19 @@ describe("Drawing cards", function() {
 		p.deck = Shuffle.shuffle({deck:[lastCard]});
 		p.discard = [lastCard];
 
-		expect(main.drawCards(p, 3).length).toEqual(2);
+		expect(main.drawCards(p, 3)).toEqual([lastCard, lastCard]);
 	});
+
+	it("returns remaining cards when there are not enough cards to draw and the discard pile is empty", function() {
+		var Shuffle = require('shuffle');
+		var lastCard = {name:"LastCard"};
+
+		p = main.initPlayer();
+		p.deck = Shuffle.shuffle({deck:[lastCard]});
+		p.discard = [];
+
+		expect(main.drawCards(p, 3)).toEqual([lastCard]);
+	})
 
 })
 

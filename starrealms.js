@@ -49,7 +49,7 @@ function drawCards(p, n)
 
 	var cards = [].concat(p.deck.draw(Math.min(n, p.deck.length)) || []);
 
-	if (cards.length < n)
+	if (cards.length < n && p.discard.length != 0)
 	{
 		p.deck.putOnTopOfDeck(p.discard);
 		p.discard = [];
@@ -125,6 +125,16 @@ function processCopyShip(p, notp) {
 	}
 }
 
+function processOr(card, p, notp) {
+	card.or.forEach(function(a) { a.name = "Or: " + card.name }); 
+	var orChoice = p.strategy.orStrategy(card); 
+	if (card.or.indexOf(orChoice) > -1) {
+		playCommon(orChoice, p, notp);
+	} else {
+		console.log(p.name, ": WARN: Invalid or choice", orChoice); 
+	}
+}
+
 function playCommon(card, p, notp) {
 	if (!card)
 		return
@@ -132,7 +142,7 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; module.log.info(card.name, " +", card.authority, " Authority (Authority:", p.authority,")");}
 	if (card.hasOwnProperty('combat')) { p.combat += card.combat; module.log.info(card.name, " +", card.combat, " Combat (Combat:", p.combat,")");}
 	if (card.hasOwnProperty('drawCard')) { var drawnCards = drawCards(p, card.drawCard); if (drawnCards) {p.hand = p.hand.concat(drawnCards);} module.log.info(card.name, " Draw ", card.drawCard)}
-    if (card.hasOwnProperty('or')) { card.or.forEach(function(a) { a.name = "Or: " + card.name }); playCommon(p.strategy.orStrategy(card), p, notp); }
+    if (card.hasOwnProperty('or')) { processOr(card, p, notp); }
 	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p, notp); }
 	if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
 	if (card.hasOwnProperty('copyShip')) { processCopyShip(p, notp); }
@@ -209,7 +219,7 @@ function processPreTurn(p)
 function processScrap(p, notp)
 {
     p.inPlay.forEach(function(card) {
-        if (card['scrapAbilities'] && p.strategy.scrapStrategy(card))
+        if (card['scrapAbilities'] && p.strategy.scrapStrategy(card, p, notp))
 	    {
             card.scrapAbilities.name = "Scrap: " + card.name;
 	        playCommon(card.scrapAbilities, p, notp);

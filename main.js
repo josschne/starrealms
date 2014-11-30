@@ -21,7 +21,7 @@ args.forEach(function(strategy, index) {
 });
 
 var startTime = Date.now();
-var simulationCount = 30000;
+var simulationCount = 10000;
 
 for (var s=0; s<simulationCount; s++) {
     seed = s;
