@@ -13,7 +13,7 @@ var log = new (winston.Logger)({
     ]
 });
 
-var simulationCount = 1000;
+var simulationCount = 15000;
 var winCount = [0, 0];
 for (var s=0; s<simulationCount; s++) {
     seed = s;

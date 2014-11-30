@@ -149,7 +149,8 @@ function processCombat(p, notp) {
 
 function processTrade(p, trade)
 {
-	var toBuy = trade.row.filter(function(card) { return (card.cost <= p.trade)});
+	var ExplorerCard = {name:"Explorer", trade:2, cost:2, scrapAbilities:{combat:2}};
+	var toBuy = trade.row.concat(ExplorerCard).filter(function(card) { return (card.cost <= p.trade)});
 	while(toBuy.length > 0 && trade.deck.length > 0)
 	{
 		var cardToBuy = p.strategy.buyStrategy(toBuy);

@@ -222,6 +222,18 @@ describe("Trade processing", function() {
 		expect(p.discard.length).toEqual(1);
 		expect(p.discard[0].cost).toEqual(3);
 	});
+
+	it("offers an Explorer for purchase", function() {
+		p = main.initPlayer();
+		p.trade = 2;
+		trade = main.initTrade();
+		trade.row = [ {cost:3} ];
+
+		main.processTrade(p, trade);
+
+		expect(p.discard.length).toEqual(1);
+		expect(p.discard[0].name).toEqual("Explorer");
+	});
 });
 
 describe("A turn", function() {

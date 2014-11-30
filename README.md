@@ -17,7 +17,6 @@ node main.js
 
 Not Yet Working
 ===============
-- Scrap Abilities
 - Destroy Base
 - Fleet HQ's "All Ships Get 1 Combat"
 - Embassy Yacht's "If at least two bases"
@@ -28,10 +27,6 @@ Not Yet Working
 - Scrap a Card
 - Machine Base's "Draw then Scrap"
 - Brain World's "Scrap and Draw"
-
-TODO
-=====
-11858 - Seed for "special" game where trade row is too expensive for starting hands to buy anything
 
 
 Develop
