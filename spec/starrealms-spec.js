@@ -194,6 +194,18 @@ describe("Drawing cards", function() {
 
 		expect(main.drawCards(p, 1)).toEqual(undefined);
 	});
+
+	it("returns remaining cards in deck when there are not enough cards to draw", function() {
+		var Shuffle = require('shuffle');
+		var lastCard = {name:"LastCard"};
+
+		p = main.initPlayer();
+		p.deck = Shuffle.shuffle({deck:[lastCard]});
+		p.discard = [lastCard];
+
+		expect(main.drawCards(p, 3).length).toEqual(2);
+	});
+
 })
 
 describe("Mech World", function() {
@@ -324,6 +336,6 @@ describe("A player", function() {
 
 describe("A game", function() {
 	it("can be played without crashing", function() {
-		main.runGame(undefined, require('../strategy'), require('../strategy'));
+		main.runGame(undefined, require('./strategy'), require('./strategy'));
 	});
 });

@@ -1,5 +1,3 @@
-var card = require('./card_utils');
-
 module.exports = {
 	buyStrategy: buyStrategy,
 	orStrategy: orStrategy,

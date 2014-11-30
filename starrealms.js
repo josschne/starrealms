@@ -25,7 +25,7 @@ module.exports = {
 function initPlayer(name, strategy)
 {
 	if (!strategy) {
-		strategy = require('./strategy');
+		strategy = require('./strategies/dumb_strategy');
 	}
 	return {name:name, discard:[], bases:[], inPlay:[], scrap:[], discarding:0, combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[], strategy:strategy};
 }
@@ -48,13 +48,14 @@ function drawCards(p, n)
 	}
 
 	var cards = [].concat(p.deck.draw(Math.min(n, p.deck.length)) || []);
+
 	if (cards.length < n)
 	{
 		p.deck.putOnTopOfDeck(p.discard);
 		p.discard = [];
 		p.deck.shuffle();
 
-		cards = cards.concat(p.deck.draw(n-cards.length));
+		cards = cards.concat(p.deck.draw(Math.min(n-cards.length, p.deck.length)));
 	}
 	
 	return cards;
@@ -116,7 +117,7 @@ function processScrapCard(card, p) {
 }
 
 function processCopyShip(p, notp) {
-	var shipToCopy = p.strategy.copyShipStrategy(p.inPlay);
+	var shipToCopy = p.strategy.copyShipStrategy(p.inPlay.filter(function(c){ return !c.base && !c.outpost;}));
 
 	if (shipToCopy && !shipToCopy.base && !shipToCopy.outpost) {
 		module.log.info("Copy Ship: "+shipToCopy.name);
