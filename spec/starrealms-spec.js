@@ -126,6 +126,23 @@ describe("A played card", function() {
 
 		expect(p.combat).toEqual(2)
 	});
+
+	it("does not allow stealth needle to copy a base or outpost", function() {
+		stealthNeedle = {copyShip:1};
+		inPlayOutpost = {combat:2, outpost:2};
+		inPlayBase = {combat:2, base:2};
+
+		p.hand = [ stealthNeedle, stealthNeedle ];
+		p.inPlay = [inPlayOutpost, inPlayBase];
+
+		p.strategy.copyShipStrategy = function() { return inPlayOutpost; };
+		main.playCard(stealthNeedle, p, notp);
+
+		p.strategy.copyShipStrategy = function() { return inPlayBase; };
+		main.playCard(stealthNeedle, p, notp);
+
+		expect(p.combat).toEqual(0);
+	});
     
     it("can be scrapped", function() {
         scrapCard = {scrapAbilities:{combat:1}};

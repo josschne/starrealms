@@ -118,7 +118,7 @@ function processScrapCard(card, p) {
 function processCopyShip(p, notp) {
 	var shipToCopy = p.strategy.copyShipStrategy(p.inPlay);
 
-	if (shipToCopy) {
+	if (shipToCopy && !shipToCopy.base && !shipToCopy.outpost) {
 		module.log.info("Copy Ship: "+shipToCopy.name);
 		playCommon(shipToCopy, p, notp);
 	}

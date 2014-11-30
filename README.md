@@ -12,7 +12,7 @@ Install node.js from http://nodejs.org/#download
 
 From the command line
 ```
-node main.js
+node main.js ./strategy.js ./strategy.js
 ```
 
 Not Yet Working
@@ -27,8 +27,6 @@ Not Yet Working
 - Embassy Yacht's "If at least two bases"
 - Machine Base's "Draw then Scrap"
 - Brain World's "Scrap then Draw"
-- Double-check that Stealth Needle is properly implementing "Stealth Needle has that ship's faction, in addition to Machine Cult"
-
 
 Develop
 =======
