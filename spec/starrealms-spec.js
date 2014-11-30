@@ -72,11 +72,22 @@ describe("A played card", function() {
 
 		expect(p.trade).toEqual(1);
 	})
+    
+    it("does not trigger ally abilities for a single outpost", function() {
+        outpost = {faction:'A', allyAbilities:{trade:1}, outpost:4};
+        
+        p.bases = [ outpost ];
+        main.playBase(outpost, p, notp);
+        
+        expect(p.trade).toEqual(0);
+    });
 
 	it("is added to the bases if it is a base or an outpost", function() {
 		card = {base:5};
 
-		main.playCard(card, p);
+        p.hand = [card];
+        trade = {row:[]};
+		main.play(p, notp, trade);
 
 		expect(p.bases.length).toEqual(1);
 	});
@@ -109,6 +120,18 @@ describe("A played card", function() {
 
 		expect(p.combat).toEqual(2)
 	});
+    
+    it("can be scrapped", function() {
+        scrapCard = {scrapAbilities:{combat:1}};
+        
+        p.inPlay = [scrapCard];
+        p.strategy.scrapStrategy = function(card) { return card; } // Always scrap for the purpose of this test
+        
+        main.processScrap(p, notp);
+        
+        expect(p.scrap.length).toEqual(1);
+        expect(p.combat).toEqual(1);
+    })
 
 });
 

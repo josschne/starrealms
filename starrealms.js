@@ -8,7 +8,9 @@ module.log = new (winston.Logger)({});
 //Add functions here to expose them outside of the module
 module.exports = {
 	runGame: runGame,
-	playCard: playCard,
+    play: play,
+    playCard: playCard,
+    playBase: playBase,
 	initPlayer: initPlayer,
 	initTrade: initTrade,
 	getFactionCount: getFactionCount,
@@ -16,6 +18,7 @@ module.exports = {
 	processTrade: processTrade,
 	processPreTurn: processPreTurn,
 	playCommon: playCommon,
+    processScrap: processScrap,
 }
 
 
@@ -41,7 +44,7 @@ function drawCards(p, n)
 	var cards = [].concat(p.deck.draw(Math.min(n, p.deck.cards.length)) || []);
 	if (cards.length < n)
 	{
-		if (n > p.discard.length) { console.log("Oh noes. Discard pile isn't big enough!"); process.exit(0); }
+        if (n > p.discard.length) { console.log("Oh noes. Discard pile isn't big enough!"); process.exit(0); }
 		p.deck.putOnTopOfDeck(p.discard);
 		p.discard = [];
 		p.deck.shuffle();
@@ -57,7 +60,7 @@ function createOrIncrement(obj, value)
 }
 
 function getFactionCount(p) {
-	var cardsInPlay = p.inPlay.concat(p.bases);
+	var cardsInPlay = p.inPlay;
 	var factionCount = cardsInPlay.reduce(function(factionCount, c){ 
         if (c.hasOwnProperty('allyAll')) {
             createOrIncrement(factionCount, 'Machine Cult');
@@ -79,13 +82,15 @@ function processAllyAbilities(card, p, notp) {
 	Object.keys(factionCount).forEach(function(faction) {
 		//Process only this card if ally abilities already activated
 		if (factionCount[faction] >= 2 && card.faction == faction && card.hasOwnProperty('allyAbilities')) {
-			playCommon(card.allyAbilities, p, notp);
+            card.allyAbilities.name = "Ally: " + card.name;
+            playCommon(card.allyAbilities, p, notp);
 		}
 		//Process all cards if ally abilities were just activated
 		if (factionCount[faction] == 1 && (card.faction == faction || card.hasOwnProperty('allyAll'))) {
-			var factionCardsWithAbilities = p.inPlay.concat(p.bases).concat(card).filter(function(c) { return c.faction == faction && c.hasOwnProperty('allyAbilities');});
+			var factionCardsWithAbilities = p.inPlay.concat(card).filter(function(c) { return c.faction == faction && c.hasOwnProperty('allyAbilities');});
 
 			factionCardsWithAbilities.forEach(function(c) {
+                c.allyAbilities.name = "Ally: " + c.name;
 				playCommon(c.allyAbilities, p, notp);
 			})
 		}
@@ -95,30 +100,25 @@ function processAllyAbilities(card, p, notp) {
 function playCommon(card, p, notp) {
 	if (!card)
 		return
-	if (card.hasOwnProperty('trade')) { p.trade += card.trade; }
-	if (card.hasOwnProperty('authority')) { p.authority += card.authority; }
-	if (card.hasOwnProperty('combat')) { p.combat += card.combat; }
-	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); }
-	if (card.hasOwnProperty('or')) { playCommon(p.strategy.orStrategy(card), p, notp); }
+	if (card.hasOwnProperty('trade')) { p.trade += card.trade; module.log.info(card.name, " +", card.trade, " Trade (Trade:", p.trade,")"); }
+	if (card.hasOwnProperty('authority')) { p.authority += card.authority; module.log.info(card.name, " +", card.authority, " Authority (Authority:", p.authority,")");}
+	if (card.hasOwnProperty('combat')) { p.combat += card.combat; module.log.info(card.name, " +", card.combat, " Combat (Combat:", p.combat,")");}
+	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); module.log.info(card.name, " Draw ", card.drawCard)}
+    if (card.hasOwnProperty('or')) { card.or.name = "Or: " + card.name; playCommon(p.strategy.orStrategy(card), p, notp); }
 	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p, notp); }
 	if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
 	if (card.hasOwnProperty('copyShip')) {playCommon(p.strategy.copyShipStrategy(p.inPlay), p, notp); }
 }
 
 function playBase(card, p, notp) {
-	playCommon(card, p, notp);
+	module.log.info("Played ", card.name);
+    playCommon(card, p, notp);
+    moveCard(card, p.bases, p.inPlay);
 }
 
 function playCard(card, p, notp) {
-	playCommon(card, p, notp);
-
-    //Note - Ally processing relies on the card being played to not be in
-    // the bases or inPlay deck until after playCommon is called
-	if (card.hasOwnProperty('base') || card.hasOwnProperty('outpost')) {
-		moveCard(card, p.hand, p.bases);
-	} else {
-		moveCard(card, p.hand, p.inPlay);
-	}
+    playCommon(card, p, notp);
+	moveCard(card, p.hand, p.inPlay);
 }
 
 function processCombat(p, notp) {
@@ -130,7 +130,8 @@ function processCombat(p, notp) {
 				if (outposts[0].outpost <= p.combat) {
 					moveCard(outposts[0], notp.bases, notp.discard);
 					p.combat -= outposts[0].outpost;
-					module.log.debug(p.name, " destroys outpost ", outposts[0].name);
+					module.log.info("-", outposts[0].outpost, " Combat (Combat:", p.combat);
+                    module.log.info("Attacked ", outposts[0].name);
 					continue;
 				}
 				else {
@@ -140,9 +141,9 @@ function processCombat(p, notp) {
 			}
 		}
 
-		module.log.debug(p.name, " attacks ", notp.name, " for ", p.combat, " authority.");
-		notp.authority -= p.combat;
-		p.combat = 0;
+        notp.authority -= p.combat;
+		module.log.info("Attacked ", notp.name, " for ", p.combat, " (New Authority:", notp.authority, ")");
+        p.combat = 0;
 	}
 }
 
@@ -152,7 +153,8 @@ function processTrade(p, trade)
 	while(toBuy.length > 0 && trade.deck.length > 0)
 	{
 		var cardToBuy = p.strategy.buyStrategy(toBuy);
-		module.log.debug(p.name, " trades ", cardToBuy.cost, " for ", cardToBuy.name);
+		module.log.info("Aquired ", cardToBuy.name);
+        module.log.info("-", cardToBuy.cost, " Trade (Trade:", p.trade,")");
 		moveCard(cardToBuy, trade.row, p.discard);
 		trade.row.push(trade.deck.draw(1));
 		p.trade -= cardToBuy.cost;
@@ -172,23 +174,22 @@ function processPreTurn(p)
 
 function processScrap(p, notp)
 {
-	// for(card in p.hand)
-	// {
-	// 	if (   card.hasOwnProperty('scrapAbilities') 
-	// 		&& Math.random() < 0.1)
-	// 	{
-	// 		playCommon(card.scrapAbilities, p, notp);
-	// 		moveCard(card, p.hand, p.scrap);
-	// 	}
-	// }
+    p.inPlay.forEach(function(card) {
+        if (card['scrapAbilities'] && p.strategy.scrapStrategy(card))
+	    {
+            card.scrapAbilities.name = "Scrap: " + card.name;
+	        playCommon(card.scrapAbilities, p, notp);
+	 		moveCard(card, p.inPlay, p.scrap);
+	 	}
+	});
 }
 
 function play(p, notp, trade) {
-	module.log.debug(p.name, "'s turn!");
+	module.log.info("=== It is now ", p.name, "'s turn. ===");
 
 	//Main
-	module.log.debug("HAND: ", p.hand.map(function(card) { return card.name; }));
-	module.log.debug("BASES: ", p.bases.map(function(card) { return card.name; }));
+	module.log.info("HAND: ", p.hand.map(function(card) { return card.name; }));
+	module.log.info("BASES: ", p.bases.map(function(card) { return card.name; }));
 
 	//Pre-turn
 	processPreTurn(p);
@@ -199,14 +200,16 @@ function play(p, notp, trade) {
 	})
 	while(p.hand.length > 0) {
 		playCard(p.hand[0], p, notp);
+        
+        //Scrap cards
+	    processScrap(p, notp);
 	};
 
-	module.log.debug("T:", p.trade, "A:", p.authority, "C:", p.combat);
+	module.log.info("T:", p.trade, "A:", p.authority, "C:", p.combat);
 	
-	module.log.debug("TRADE: ", trade.row.map(function(card) { return card.name; }));
+	module.log.info("TRADE: ", trade.row.map(function(card) { return card.name; }));
 	
-	//Scrap cards
-	processScrap(p, notp);
+
 	
 	//Main Combat
 	processCombat(p, notp);
@@ -215,8 +218,17 @@ function play(p, notp, trade) {
 	processTrade(p, trade);
 
 	//Discard
-	p.discard = p.discard.concat(p.inPlay);
+	p.discard = p.discard.concat(p.hand);
+    while(p.inPlay.length > 0) {
+        card = p.inPlay[0];
+        if (card.base || card.outpost) {
+            moveCard(card, p.inPlay, p.bases);
+        } else {
+            moveCard(card, p.inPlay, p.discard);
+        }
+    };
 	p.inPlay = [];
+    p.hand = [];
 	//Draw
 	p.hand = drawCards(p,5);
 }

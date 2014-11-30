@@ -13,12 +13,12 @@ var log = new (winston.Logger)({
     ]
 });
 
-var simulationCount = 5000;
+var simulationCount = 1000;
 var winCount = [0, 0];
 for (var s=0; s<simulationCount; s++) {
     seed = s;
     log.info('Seed: ', seed);
-	var result = Starrealms.runGame(log);
+	var result = Starrealms.runGame(); // Pass log into runGame() to enable debug outpu
 	if (result[0] > result[1]) {
 		winCount[0]++;
 	}
