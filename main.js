@@ -13,7 +13,8 @@ var log = new (winston.Logger)({
     ]
 });
 
-var simulationCount = 15000;
+var startTime = Date.now();
+var simulationCount = 5000;
 var winCount = [0, 0];
 for (var s=0; s<simulationCount; s++) {
     seed = s;
@@ -27,5 +28,10 @@ for (var s=0; s<simulationCount; s++) {
 		winCount[1]++;
 	}
 }
-console.log("Simulation complete: ", winCount);
+var endTime = Date.now();
+
+console.log("Simulation complete");
+console.log("Win count: ", winCount);
 console.log("Ratio (p1/p2): ", winCount[0]/winCount[1]);
+console.log("Total time: ", endTime-startTime, "ms");
+console.log("Games/sec: ", simulationCount / (endTime-startTime) * 1000);

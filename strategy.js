@@ -5,6 +5,7 @@ module.exports = {
 	orStrategy: orStrategy,
 	copyShipStrategy: copyShipStrategy,
     scrapStrategy: scrapStrategy,
+    scrapCardStrategy: scrapCardStrategy,
 }
 
 function orStrategy(card)
@@ -28,4 +29,9 @@ function scrapStrategy(card)
         return card;
     }
     return undefined;
+}
+
+function scrapCardStrategy(p) {
+	var toDiscard = p.discard.filter(function(card) { return card.name == "Viper" || card.name == "Scout"; });
+	return toDiscard[0];
 }

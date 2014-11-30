@@ -18,13 +18,12 @@ node main.js
 Not Yet Working
 ===============
 - Destroy Base
-- Fleet HQ's "All Ships Get 1 Combat"
-- Embassy Yacht's "If at least two bases"
 - Next Ship to Top
 - Scrap Trade Row
 - Next Ship No Cost
-- Draw Card for Each Blob
-- Scrap a Card
+- Blob World's "Draw Card for Each Blob"
+- Fleet HQ's "All Ships Get 1 Combat"
+- Embassy Yacht's "If at least two bases"
 - Machine Base's "Draw then Scrap"
 - Brain World's "Scrap and Draw"
 

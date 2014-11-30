@@ -3,6 +3,12 @@ module.exports = {
 }
 
 function moveCard(card, src, dst) {
-	dst.push(card);
-	src.splice(src.indexOf(card), 1);
+	if (card) {
+		if (src.indexOf(card) < 0) {
+			throw "Could not move card: " + JSON.stringify(card);
+		} else {
+			dst.push(card);
+			src.splice(src.indexOf(card), 1);
+		}
+	}
 }

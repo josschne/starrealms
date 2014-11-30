@@ -9,6 +9,7 @@ describe("A played card", function() {
 
 	it("increases the player's trade", function() {
 		card = {trade:1};
+		p.hand = [card];
 		main.playCard(card, p);
 
 		expect(p.trade).toEqual(1);
@@ -16,6 +17,7 @@ describe("A played card", function() {
 
 	it("increases the player's authority", function() {
 		card = {authority:1};
+		p.hand = [card];
 		main.playCard(card, p);
 
 		expect(p.authority).toEqual(51);
@@ -23,6 +25,7 @@ describe("A played card", function() {
 
 	it("increases the player's combat", function() {
 		card = {combat:1};
+		p.hand = [card];
 		main.playCard(card, p);
 
 		expect(p.combat).toEqual(1);
@@ -42,6 +45,7 @@ describe("A played card", function() {
 		p.inPlay = [ {faction:'A'} ];
 
 		//Only one of the two cards' ally abilities should be triggered
+		p.hand = [cardA, cardB];
 		main.playCard(cardA, p);
 		main.playCard(cardB, p);
 
@@ -65,7 +69,7 @@ describe("A played card", function() {
 		cardB = {faction:'A'};
 
 		p.hand = [ cardA ];
-		p.deck.putOnTopOfDeck(cardB);
+		p.deck.putOnTopOfDeck([cardB]);
 
 		main.playCard(cardA, p);
 		main.playCard(cardB, p);
@@ -95,6 +99,7 @@ describe("A played card", function() {
 	it("handles 'or' conditions", function() {
 		card = {or:[{trade:1}, {combat:2}]};
 
+		p.hand = [card];
 		main.playCard(card, p);
 
 		expect(p.trade).toEqual(1);
@@ -104,6 +109,7 @@ describe("A played card", function() {
 	it("handles opponent discard", function() {
 		card = {opponentDiscard:1};
 
+		p.hand = [card];
 		main.playCard(card, p, notp);
 
 		expect(notp.discarding).toEqual(1);
@@ -131,6 +137,34 @@ describe("A played card", function() {
         
         expect(p.scrap.length).toEqual(1);
         expect(p.combat).toEqual(1);
+    });
+
+    it("can scrap a card in the discard pile when allowed", function() {
+    	cardWithScrapAbility = {scrapCard:1};
+    	viper = {name:"Viper"};
+
+    	p.hand = [cardWithScrapAbility];
+    	p.discard = [viper];
+    	p.strategy.scrapCardStrategy = function(p) { return viper; }; //Silly strategy that only scraps Vipers
+
+    	main.playCard(cardWithScrapAbility, p, notp);
+
+    	expect(p.discard.length).toEqual(0);
+    	expect(p.scrap.length).toEqual(1);
+    })
+
+
+    it("can scrap a card in your hand when allowed", function() {
+    	cardWithScrapAbility = {scrapCard:1};
+    	viper = {name:"Viper"};
+
+    	p.hand = [cardWithScrapAbility, viper];
+    	p.strategy.scrapCardStrategy = function(p) { return viper; }; //Silly strategy that only scraps Vipers
+
+    	main.playCard(cardWithScrapAbility, p, notp);
+
+    	expect(p.hand.length).toEqual(0);
+    	expect(p.scrap.length).toEqual(1);
     })
 
 });
@@ -234,6 +268,7 @@ describe("Trade processing", function() {
 		expect(p.discard.length).toEqual(1);
 		expect(p.discard[0].name).toEqual("Explorer");
 	});
+
 });
 
 describe("A turn", function() {

@@ -41,7 +41,7 @@ function initPlayerDeck() {
 
 function drawCards(p, n)
 {
-	var cards = [].concat(p.deck.draw(Math.min(n, p.deck.cards.length)) || []);
+	var cards = [].concat(p.deck.draw(Math.min(n, p.deck.length)) || []);
 	if (cards.length < n)
 	{
         if (n > p.discard.length) { console.log("Oh noes. Discard pile isn't big enough!"); process.exit(0); }
@@ -97,6 +97,18 @@ function processAllyAbilities(card, p, notp) {
 	});
 }
 
+function processScrapCard(card, p) {
+	if (card) {
+		if (p.discard.indexOf(card) > -1) {
+			moveCard(card, p.discard, p.scrap);
+			module.log.info("Scrapping: ", card.name);
+		} else if (p.hand.indexOf(card) > -1) {
+			moveCard(card, p.hand, p.scrap);
+			module.log.info("Scrapping: ", card.name);
+		}
+	}
+}
+
 function playCommon(card, p, notp) {
 	if (!card)
 		return
@@ -104,10 +116,11 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('authority')) { p.authority += card.authority; module.log.info(card.name, " +", card.authority, " Authority (Authority:", p.authority,")");}
 	if (card.hasOwnProperty('combat')) { p.combat += card.combat; module.log.info(card.name, " +", card.combat, " Combat (Combat:", p.combat,")");}
 	if (card.hasOwnProperty('drawCard')) { p.hand = p.hand.concat(drawCards(p, card.drawCard)); module.log.info(card.name, " Draw ", card.drawCard)}
-    if (card.hasOwnProperty('or')) { card.or.name = "Or: " + card.name; playCommon(p.strategy.orStrategy(card), p, notp); }
+    if (card.hasOwnProperty('or')) { card.or.forEach(function(a) { a.name = "Or: " + card.name }); playCommon(p.strategy.orStrategy(card), p, notp); }
 	if (card.hasOwnProperty('faction')) { processAllyAbilities(card, p, notp); }
 	if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
 	if (card.hasOwnProperty('copyShip')) {playCommon(p.strategy.copyShipStrategy(p.inPlay), p, notp); }
+	if (card.hasOwnProperty('scrapCard')) { processScrapCard(p.strategy.scrapCardStrategy(p), p); }
 }
 
 function playBase(card, p, notp) {
@@ -130,7 +143,7 @@ function processCombat(p, notp) {
 				if (outposts[0].outpost <= p.combat) {
 					moveCard(outposts[0], notp.bases, notp.discard);
 					p.combat -= outposts[0].outpost;
-					module.log.info("-", outposts[0].outpost, " Combat (Combat:", p.combat);
+					module.log.info("-", outposts[0].outpost, " Combat (Combat:", p.combat, ")");
                     module.log.info("Attacked ", outposts[0].name);
 					continue;
 				}
@@ -154,12 +167,16 @@ function processTrade(p, trade)
 	while(toBuy.length > 0 && trade.deck.length > 0)
 	{
 		var cardToBuy = p.strategy.buyStrategy(toBuy);
+		if (cardToBuy === ExplorerCard) {
+			p.discard = p.discard.concat(ExplorerCard);
+		} else {
+			moveCard(cardToBuy, trade.row, p.discard);
+			trade.row.push(trade.deck.draw(1));
+		}
+		p.trade -= cardToBuy.cost;
 		module.log.info("Aquired ", cardToBuy.name);
         module.log.info("-", cardToBuy.cost, " Trade (Trade:", p.trade,")");
-		moveCard(cardToBuy, trade.row, p.discard);
-		trade.row.push(trade.deck.draw(1));
-		p.trade -= cardToBuy.cost;
-		toBuy = trade.row.filter(function(card) { return (card.cost <= p.trade)});
+		toBuy = trade.row.concat(ExplorerCard).filter(function(card) { return (card.cost <= p.trade)});
 	}
 	p.trade = 0;
 }
