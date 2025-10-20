@@ -710,6 +710,136 @@ describe("nextShipNoCost ability", function() {
 	});
 });
 
+describe("drawCardForEachBlob ability", function() {
+	beforeEach(function() {
+		var Shuffle = require('shuffle');
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("draws cards equal to number of Blobs in play", function() {
+		var Shuffle = require('shuffle');
+		var card = {drawCardForEachBlob:1};
+		var blob1 = {name:'Blob1', faction:'The Blob'};
+		var blob2 = {name:'Blob2', faction:'The Blob'};
+		var deckCard = {name:'Deck'};
+
+		p.hand = [card];
+		p.inPlay = [blob1, blob2];
+		p.deck = Shuffle.shuffle({deck: [deckCard, deckCard]});
+
+		main.playCard(card, p, notp);
+
+		expect(p.hand.length).toEqual(2); // Drew 2 cards for 2 Blobs
+	});
+});
+
+describe("allShipsCombat ability", function() {
+	beforeEach(function() {
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("gives +1 combat to all ships in play", function() {
+		var card = {allShipsCombat:1};
+		var ship1 = {name:'Ship1'};
+		var ship2 = {name:'Ship2'};
+		var base = {name:'Base', base:5};
+
+		p.hand = [card];
+		p.inPlay = [ship1, ship2, base];
+
+		main.playCard(card, p, notp);
+
+		expect(p.combat).toEqual(2); // 2 ships * 1 combat each
+	});
+});
+
+describe("ifAtLeastTwoBases ability", function() {
+	beforeEach(function() {
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("triggers ability when player has 2+ bases", function() {
+		var card = {ifAtLeastTwoBases:{drawCard:2}};
+		var base1 = {name:'Base1', base:5};
+		var base2 = {name:'Base2', base:5};
+
+		p.hand = [card];
+		p.bases = [base1, base2];
+		p.deck.putOnTopOfDeck([{name:'Deck1'}, {name:'Deck2'}]);
+
+		main.playCard(card, p, notp);
+
+		expect(p.hand.length).toEqual(2); // Drew 2 cards
+	});
+
+	it("does not trigger when player has fewer than 2 bases", function() {
+		var card = {ifAtLeastTwoBases:{drawCard:2}};
+		var base1 = {name:'Base1', base:5};
+
+		p.hand = [card];
+		p.bases = [base1];
+
+		main.playCard(card, p, notp);
+
+		expect(p.hand.length).toEqual(0); // Did not draw
+	});
+});
+
+describe("drawThenScrap ability", function() {
+	beforeEach(function() {
+		var Shuffle = require('shuffle');
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("draws cards then scraps one from hand", function() {
+		var Shuffle = require('shuffle');
+		var card = {drawThenScrap:2};
+		var deckCard1 = {name:'Deck1'};
+		var deckCard2 = {name:'Deck2'};
+
+		p.hand = [card];
+		p.deck = Shuffle.shuffle({deck: [deckCard1, deckCard2]});
+		p.strategy.drawThenScrapStrategy = function(hand) { return deckCard1; };
+
+		main.playCard(card, p, notp);
+
+		// Drew 2, then scrapped 1, so should have 1 in hand
+		expect(p.hand.length).toEqual(1);
+		expect(p.scrap.length).toEqual(1);
+		expect(p.scrap[0]).toBe(deckCard1);
+	});
+});
+
+describe("scrapThenDraw ability", function() {
+	beforeEach(function() {
+		var Shuffle = require('shuffle');
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("scraps a card from hand then draws", function() {
+		var Shuffle = require('shuffle');
+		var card = {scrapThenDraw:2};
+		var handCard = {name:'Hand'};
+		var deckCard = {name:'Deck'};
+
+		p.hand = [card, handCard];
+		p.deck = Shuffle.shuffle({deck: [deckCard, deckCard]});
+		p.strategy.scrapThenDrawStrategy = function(hand) { return handCard; };
+
+		main.playCard(card, p, notp);
+
+		// Scrapped 1 from hand, then drew 2, so should have 2 in hand
+		expect(p.hand.length).toEqual(2);
+		expect(p.scrap.length).toEqual(1);
+		expect(p.scrap[0]).toBe(handCard);
+	});
+});
+
 describe("A game", function() {
 	it("can be played without crashing", function() {
 		main.runGame(undefined, require('./strategy'), require('./strategy'));

@@ -170,6 +170,66 @@ function processScrapTradeRow(p) {
 	}
 }
 
+function processDrawCardForEachBlob(p) {
+	var blobCount = p.inPlay.filter(function(c) { return c.faction === 'The Blob'; }).length;
+	if (blobCount > 0) {
+		var drawnCards = drawCards(p, blobCount);
+		if (drawnCards) {
+			p.hand = p.hand.concat(drawnCards);
+			module.log.info("Drew ", blobCount, " cards for Blobs");
+		}
+	}
+}
+
+function processAllShipsCombat(p) {
+	var ships = p.inPlay.filter(function(c) { return !c.base && !c.outpost; });
+	ships.forEach(function(ship) {
+		p.combat += 1;
+		module.log.info(ship.name, " +1 Combat from Fleet HQ");
+	});
+}
+
+function processIfAtLeastTwoBases(card, p, notp) {
+	if (p.bases.length >= 2 && card.ifAtLeastTwoBases) {
+		module.log.info("At least two bases - triggering ability");
+		playCommon(card.ifAtLeastTwoBases, p, notp);
+	}
+}
+
+function processDrawThenScrap(card, p) {
+	if (card.drawThenScrap) {
+		var drawnCards = drawCards(p, card.drawThenScrap);
+		if (drawnCards) {
+			p.hand = p.hand.concat(drawnCards);
+			module.log.info("Drew ", card.drawThenScrap, " cards");
+		}
+		if (p.hand.length > 0) {
+			var cardToScrap = p.strategy.drawThenScrapStrategy(p.hand);
+			if (cardToScrap && p.hand.indexOf(cardToScrap) > -1) {
+				moveCard(cardToScrap, p.hand, p.scrap);
+				module.log.info("Scrapped: "+cardToScrap.name);
+			}
+		}
+	}
+}
+
+function processScrapThenDraw(card, p) {
+	if (card.scrapThenDraw) {
+		if (p.hand.length > 0) {
+			var cardToScrap = p.strategy.scrapThenDrawStrategy(p.hand);
+			if (cardToScrap && p.hand.indexOf(cardToScrap) > -1) {
+				moveCard(cardToScrap, p.hand, p.scrap);
+				module.log.info("Scrapped: "+cardToScrap.name);
+			}
+		}
+		var drawnCards = drawCards(p, card.scrapThenDraw);
+		if (drawnCards) {
+			p.hand = p.hand.concat(drawnCards);
+			module.log.info("Drew ", card.scrapThenDraw, " cards");
+		}
+	}
+}
+
 function processOr(card, p, notp) {
 	card.or.forEach(function(a) { a.name = "Or: " + card.name }); 
 	var orChoice = p.strategy.orStrategy(card); 
@@ -197,6 +257,11 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('nextShipNoCost')) { p.nextShipNoCost = true; module.log.info("Next ship no cost"); }
 	if (card.hasOwnProperty('discardThenDraw')) { processDiscardThenDraw(card, p); }
 	if (card.hasOwnProperty('scrapTradeRow')) { processScrapTradeRow(p); }
+	if (card.hasOwnProperty('drawCardForEachBlob')) { processDrawCardForEachBlob(p); }
+	if (card.hasOwnProperty('allShipsCombat')) { processAllShipsCombat(p); }
+	if (card.hasOwnProperty('ifAtLeastTwoBases')) { processIfAtLeastTwoBases(card, p, notp); }
+	if (card.hasOwnProperty('drawThenScrap')) { processDrawThenScrap(card, p); }
+	if (card.hasOwnProperty('scrapThenDraw')) { processScrapThenDraw(card, p); }
 }
 
 function playBase(card, p, notp) {
