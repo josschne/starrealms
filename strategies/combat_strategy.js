@@ -6,6 +6,7 @@ module.exports = {
     scrapStrategy: scrapStrategy,
     scrapCardStrategy: scrapCardStrategy,
     destroyBaseStrategy: destroyBaseStrategy,
+    discardThenDrawStrategy: discardThenDrawStrategy,
 }
 
 function orStrategy(card)
@@ -67,4 +68,14 @@ function destroyBaseStrategy(opponentBases) {
 	}
 	// Otherwise destroy any base
 	return opponentBases[0];
+}
+
+function discardThenDrawStrategy(hand, count) {
+	// Discard cards with lowest combat value first
+	var sorted = hand.slice().sort(function(a, b) {
+		var aCombat = a.combat || 0;
+		var bCombat = b.combat || 0;
+		return aCombat - bCombat;
+	});
+	return sorted.slice(0, count);
 }

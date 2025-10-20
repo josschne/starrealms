@@ -512,6 +512,76 @@ describe("nextShipToTop ability", function() {
 	});
 });
 
+describe("discardThenDraw ability", function() {
+	beforeEach(function() {
+		var Shuffle = require('shuffle');
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("discards then draws the specified number of cards", function() {
+		var Shuffle = require('shuffle');
+		var discardCard = {discardThenDraw:2};
+		var handCard1 = {name:'Hand1'};
+		var handCard2 = {name:'Hand2'};
+		var deckCard1 = {name:'Deck1'};
+		var deckCard2 = {name:'Deck2'};
+
+		p.hand = [discardCard, handCard1, handCard2];
+		p.deck = Shuffle.shuffle({deck: [deckCard1, deckCard2]});
+		p.strategy.discardThenDrawStrategy = function(hand, count) {
+			return [handCard1, handCard2];
+		};
+
+		main.playCard(discardCard, p, notp);
+
+		// Should have 2 cards in hand (the 2 drawn cards)
+		expect(p.hand.length).toEqual(2);
+		// Should have discarded 2 cards
+		expect(p.discard.length).toEqual(2);
+		expect(p.discard.indexOf(handCard1)).toBeGreaterThan(-1);
+		expect(p.discard.indexOf(handCard2)).toBeGreaterThan(-1);
+	});
+
+	it("draws cards after discarding", function() {
+		var Shuffle = require('shuffle');
+		var discardCard = {discardThenDraw:1};
+		var handCard = {name:'Hand'};
+		var deckCard = {name:'Deck'};
+
+		p.hand = [discardCard, handCard];
+		p.deck = Shuffle.shuffle({deck: [deckCard]});
+		p.strategy.discardThenDrawStrategy = function(hand, count) {
+			return [handCard];
+		};
+
+		main.playCard(discardCard, p, notp);
+
+		// The deck card should now be in hand
+		expect(p.hand.indexOf(deckCard)).toBeGreaterThan(-1);
+	});
+
+	it("works in an or ability context", function() {
+		var Shuffle = require('shuffle');
+		var card = {or: [{trade:1}, {discardThenDraw:2}]};
+		var handCard1 = {name:'Hand1'};
+		var handCard2 = {name:'Hand2'};
+		var deckCard = {name:'Deck'};
+
+		p.hand = [card, handCard1, handCard2];
+		p.deck = Shuffle.shuffle({deck: [deckCard, deckCard]});
+		p.strategy.orStrategy = function(c) { return c.or[1]; }; // Choose discardThenDraw
+		p.strategy.discardThenDrawStrategy = function(hand, count) {
+			return [handCard1, handCard2];
+		};
+
+		main.playCard(card, p, notp);
+
+		expect(p.discard.length).toEqual(2);
+		expect(p.hand.length).toEqual(2);
+	});
+});
+
 describe("A game", function() {
 	it("can be played without crashing", function() {
 		main.runGame(undefined, require('./strategy'), require('./strategy'));
