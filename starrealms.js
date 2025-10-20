@@ -154,6 +154,22 @@ function processDiscardThenDraw(card, p) {
 	}
 }
 
+function processScrapTradeRow(p) {
+	if (p.trade_row && p.trade_row.row.length > 0) {
+		var cardToScrap = p.strategy.scrapTradeRowStrategy(p.trade_row.row);
+		if (cardToScrap && p.trade_row.row.indexOf(cardToScrap) > -1) {
+			module.log.info("Scrap from trade row: "+cardToScrap.name);
+			// Remove from trade row and add to scrap
+			p.trade_row.row.splice(p.trade_row.row.indexOf(cardToScrap), 1);
+			p.scrap.push(cardToScrap);
+			// Replenish trade row
+			if (p.trade_row.deck.length > 0) {
+				p.trade_row.row.push(p.trade_row.deck.draw(1));
+			}
+		}
+	}
+}
+
 function processOr(card, p, notp) {
 	card.or.forEach(function(a) { a.name = "Or: " + card.name }); 
 	var orChoice = p.strategy.orStrategy(card); 
@@ -179,6 +195,7 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('destroyBase')) { processDestroyBase(p, notp); }
 	if (card.hasOwnProperty('nextShipToTop')) { p.nextShipToTop = true; module.log.info("Next ship to top of deck"); }
 	if (card.hasOwnProperty('discardThenDraw')) { processDiscardThenDraw(card, p); }
+	if (card.hasOwnProperty('scrapTradeRow')) { processScrapTradeRow(p); }
 }
 
 function playBase(card, p, notp) {
@@ -283,6 +300,9 @@ function play(p, notp, trade) {
 	module.log.info("HAND: ", p.hand.map(function(card) { return card.name; }));
 	module.log.info("BASES: ", p.bases.map(function(card) { return card.name; }));
 
+	//Make trade available to player for scrapTradeRow ability
+	p.trade_row = trade;
+
 	//Pre-turn
 	processPreTurn(p);
 
@@ -321,6 +341,8 @@ function play(p, notp, trade) {
     };
 	p.inPlay = [];
     p.hand = [];
+	//Clear trade row reference
+	p.trade_row = undefined;
 	//Draw
 	p.hand = drawCards(p,5);
 }

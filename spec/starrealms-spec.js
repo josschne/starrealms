@@ -582,6 +582,69 @@ describe("discardThenDraw ability", function() {
 	});
 });
 
+describe("scrapTradeRow ability", function() {
+	beforeEach(function() {
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("removes a card from the trade row and scraps it", function() {
+		var scrapCard = {scrapTradeRow:1};
+		var tradeCard1 = {name:'Trade1', cost:3};
+		var tradeCard2 = {name:'Trade2', cost:4};
+		var replacementCard = {name:'Replacement', cost:5};
+
+		p.hand = [scrapCard];
+		trade = main.initTrade();
+		trade.row = [tradeCard1, tradeCard2];
+		trade.deck.putOnTopOfDeck([replacementCard]);
+
+		p.strategy.scrapTradeRowStrategy = function(row) { return tradeCard1; };
+
+		main.play(p, notp, trade);
+
+		// Trade row should still have 2 cards (one scrapped, one added)
+		expect(trade.row.length).toEqual(2);
+		// The scrapped card should not be in trade row
+		expect(trade.row.indexOf(tradeCard1)).toEqual(-1);
+		// The replacement card should be in trade row
+		expect(trade.row.indexOf(replacementCard)).toBeGreaterThan(-1);
+		// The scrapped card should be in player's scrap pile
+		expect(p.scrap.indexOf(tradeCard1)).toBeGreaterThan(-1);
+	});
+
+	it("works as an ally ability", function() {
+		var allyCard1 = {faction:'A'};
+		var allyCard2 = {faction:'A', allyAbilities:{scrapTradeRow:1}};
+		var tradeCard = {name:'Trade', cost:3};
+		var replacementCard = {name:'Replacement', cost:5};
+
+		p.hand = [allyCard1, allyCard2];
+		trade = main.initTrade();
+		trade.row = [tradeCard];
+		trade.deck.putOnTopOfDeck([replacementCard]);
+
+		p.strategy.scrapTradeRowStrategy = function(row) { return tradeCard; };
+
+		main.play(p, notp, trade);
+
+		expect(p.scrap.indexOf(tradeCard)).toBeGreaterThan(-1);
+		expect(trade.row.indexOf(replacementCard)).toBeGreaterThan(-1);
+	});
+
+	it("does nothing if trade row is empty", function() {
+		var scrapCard = {scrapTradeRow:1};
+
+		p.hand = [scrapCard];
+		trade = main.initTrade();
+		trade.row = [];
+
+		main.play(p, notp, trade);
+
+		expect(p.scrap.length).toEqual(0);
+	});
+});
+
 describe("A game", function() {
 	it("can be played without crashing", function() {
 		main.runGame(undefined, require('./strategy'), require('./strategy'));

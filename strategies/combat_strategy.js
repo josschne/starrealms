@@ -7,6 +7,7 @@ module.exports = {
     scrapCardStrategy: scrapCardStrategy,
     destroyBaseStrategy: destroyBaseStrategy,
     discardThenDrawStrategy: discardThenDrawStrategy,
+    scrapTradeRowStrategy: scrapTradeRowStrategy,
 }
 
 function orStrategy(card)
@@ -78,4 +79,12 @@ function discardThenDrawStrategy(hand, count) {
 		return aCombat - bCombat;
 	});
 	return sorted.slice(0, count);
+}
+
+function scrapTradeRowStrategy(tradeRow) {
+	// Scrap the most expensive card (to deny opponent)
+	var sorted = tradeRow.slice().sort(function(a, b) {
+		return (b.cost || 0) - (a.cost || 0);
+	});
+	return sorted[0];
 }

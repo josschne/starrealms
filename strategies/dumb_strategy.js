@@ -7,6 +7,7 @@ module.exports = {
     scrapCardStrategy: scrapCardStrategy,
     destroyBaseStrategy: destroyBaseStrategy,
     discardThenDrawStrategy: discardThenDrawStrategy,
+    scrapTradeRowStrategy: scrapTradeRowStrategy,
 }
 
 function orStrategy(card)
@@ -44,4 +45,9 @@ function destroyBaseStrategy(opponentBases) {
 function discardThenDrawStrategy(hand, count) {
 	// Discard the first 'count' cards from hand
 	return hand.slice(0, count);
+}
+
+function scrapTradeRowStrategy(tradeRow) {
+	// Scrap the first card
+	return tradeRow[0];
 }
