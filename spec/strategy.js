@@ -55,6 +55,11 @@ function drawThenScrapStrategy(hand) {
 	return hand[0];
 }
 
-function scrapThenDrawStrategy(hand) {
-	return hand[0];
+function scrapThenDrawStrategy(hand, discard, maxCount) {
+	// Scrap from discard first, then hand
+	var toScrap = discard.slice(0, maxCount);
+	if (toScrap.length < maxCount) {
+		toScrap = toScrap.concat(hand.slice(0, maxCount - toScrap.length));
+	}
+	return toScrap;
 }

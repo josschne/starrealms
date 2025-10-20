@@ -101,12 +101,15 @@ function drawThenScrapStrategy(hand) {
 	return sorted[0];
 }
 
-function scrapThenDrawStrategy(hand) {
-	// Scrap card with lowest combat value
-	var sorted = hand.slice().sort(function(a, b) {
+function scrapThenDrawStrategy(hand, discard, maxCount) {
+	// Combine hand and discard, sort by combat value (lowest first)
+	var allCards = hand.concat(discard);
+	var sorted = allCards.sort(function(a, b) {
 		var aCombat = a.combat || 0;
 		var bCombat = b.combat || 0;
 		return aCombat - bCombat;
 	});
-	return sorted[0];
+
+	// Return up to maxCount cards with lowest combat
+	return sorted.slice(0, maxCount);
 }

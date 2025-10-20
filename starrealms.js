@@ -215,17 +215,31 @@ function processDrawThenScrap(card, p) {
 
 function processScrapThenDraw(card, p) {
 	if (card.scrapThenDraw) {
-		if (p.hand.length > 0) {
-			var cardToScrap = p.strategy.scrapThenDrawStrategy(p.hand);
-			if (cardToScrap && p.hand.indexOf(cardToScrap) > -1) {
-				moveCard(cardToScrap, p.hand, p.scrap);
-				module.log.info("Scrapped: "+cardToScrap.name);
-			}
+		// Strategy selects up to 'scrapThenDraw' cards from hand and/or discard
+		var cardsToScrap = p.strategy.scrapThenDrawStrategy(p.hand, p.discard, card.scrapThenDraw);
+		var scrappedCount = 0;
+
+		if (cardsToScrap && cardsToScrap.length > 0) {
+			cardsToScrap.forEach(function(cardToScrap) {
+				if (p.hand.indexOf(cardToScrap) > -1) {
+					moveCard(cardToScrap, p.hand, p.scrap);
+					module.log.info("Scrapped from hand: "+cardToScrap.name);
+					scrappedCount++;
+				} else if (p.discard.indexOf(cardToScrap) > -1) {
+					moveCard(cardToScrap, p.discard, p.scrap);
+					module.log.info("Scrapped from discard: "+cardToScrap.name);
+					scrappedCount++;
+				}
+			});
 		}
-		var drawnCards = drawCards(p, card.scrapThenDraw);
-		if (drawnCards) {
-			p.hand = p.hand.concat(drawnCards);
-			module.log.info("Drew ", card.scrapThenDraw, " cards");
+
+		// Draw cards equal to number scrapped
+		if (scrappedCount > 0) {
+			var drawnCards = drawCards(p, scrappedCount);
+			if (drawnCards) {
+				p.hand = p.hand.concat(drawnCards);
+				module.log.info("Drew ", scrappedCount, " cards for scrapping");
+			}
 		}
 	}
 }

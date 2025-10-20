@@ -821,22 +821,68 @@ describe("scrapThenDraw ability", function() {
 		notp = main.initPlayer();
 	});
 
-	it("scraps a card from hand then draws", function() {
+	it("scraps cards from hand/discard then draws equal number", function() {
+		var Shuffle = require('shuffle');
+		var card = {scrapThenDraw:2};
+		var handCard = {name:'Hand'};
+		var discardCard = {name:'Discard'};
+		var deckCard = {name:'Deck'};
+
+		p.hand = [card, handCard];
+		p.discard = [discardCard];
+		p.deck = Shuffle.shuffle({deck: [deckCard, deckCard]});
+		// Strategy scraps 2 cards: one from hand, one from discard
+		p.strategy.scrapThenDrawStrategy = function(hand, discard, maxCount) {
+			return [handCard, discardCard];
+		};
+
+		main.playCard(card, p, notp);
+
+		// Scrapped 2 cards, drew 2, so should have 2 in hand
+		expect(p.hand.length).toEqual(2);
+		expect(p.scrap.length).toEqual(2);
+		expect(p.scrap.indexOf(handCard)).toBeGreaterThan(-1);
+		expect(p.scrap.indexOf(discardCard)).toBeGreaterThan(-1);
+	});
+
+	it("draws based on number of cards actually scrapped", function() {
 		var Shuffle = require('shuffle');
 		var card = {scrapThenDraw:2};
 		var handCard = {name:'Hand'};
 		var deckCard = {name:'Deck'};
 
 		p.hand = [card, handCard];
-		p.deck = Shuffle.shuffle({deck: [deckCard, deckCard]});
-		p.strategy.scrapThenDrawStrategy = function(hand) { return handCard; };
+		p.discard = [];
+		p.deck = Shuffle.shuffle({deck: [deckCard]});
+		// Strategy only scraps 1 card
+		p.strategy.scrapThenDrawStrategy = function(hand, discard, maxCount) {
+			return [handCard];
+		};
 
 		main.playCard(card, p, notp);
 
-		// Scrapped 1 from hand, then drew 2, so should have 2 in hand
-		expect(p.hand.length).toEqual(2);
+		// Scrapped 1 card, drew 1, so should have 1 in hand
+		expect(p.hand.length).toEqual(1);
 		expect(p.scrap.length).toEqual(1);
-		expect(p.scrap[0]).toBe(handCard);
+	});
+
+	it("allows scrapping zero cards", function() {
+		var Shuffle = require('shuffle');
+		var card = {scrapThenDraw:2};
+		var handCard = {name:'Hand'};
+
+		p.hand = [card, handCard];
+		p.discard = [];
+		// Strategy scraps nothing
+		p.strategy.scrapThenDrawStrategy = function(hand, discard, maxCount) {
+			return [];
+		};
+
+		main.playCard(card, p, notp);
+
+		// Scrapped 0, drew 0, so should have 1 card still in hand
+		expect(p.hand.length).toEqual(1);
+		expect(p.scrap.length).toEqual(0);
 	});
 });
 

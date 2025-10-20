@@ -59,7 +59,17 @@ function drawThenScrapStrategy(hand) {
 	return hand[0];
 }
 
-function scrapThenDrawStrategy(hand) {
-	// Scrap the first card
-	return hand[0];
+function scrapThenDrawStrategy(hand, discard, maxCount) {
+	// Scrap up to maxCount cards from discard first (prefer Vipers/Scouts)
+	var vipers = discard.filter(function(c) { return c.name === "Viper"; });
+	var scouts = discard.filter(function(c) { return c.name === "Scout"; });
+	var toScrap = vipers.concat(scouts).slice(0, maxCount);
+
+	// If we still have room, scrap from hand
+	if (toScrap.length < maxCount) {
+		var remaining = maxCount - toScrap.length;
+		toScrap = toScrap.concat(hand.slice(0, remaining));
+	}
+
+	return toScrap;
 }
