@@ -37,6 +37,20 @@ Two example strategies are included:
 
 You can create custom strategies by implementing the strategy interface.
 
+Known Issues (Under Review)
+============================
+During verification against official Star Realms sources, the following issues were identified:
+
+1. **Brain World** - Incorrect implementation
+   - Current: Always draws 2 cards after scrapping 1 card from hand
+   - Correct: Should scrap up to 2 cards from hand AND/OR discard pile, then draw 1 card for each card scrapped
+   - Status: 🔧 Fix in progress
+
+2. **Fleet HQ** - Potential timing issue
+   - Current: Gives +1 combat to ships already in play when Fleet HQ base is played
+   - Correct: Should give +1 combat to all ships while Fleet HQ base is in play (continuous effect)
+   - Status: 🔍 Under review - may be functionally correct due to turn order
+
 Develop
 =======
 
