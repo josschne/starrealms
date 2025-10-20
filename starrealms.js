@@ -181,14 +181,6 @@ function processDrawCardForEachBlob(p) {
 	}
 }
 
-function processAllShipsCombat(p) {
-	var ships = p.inPlay.filter(function(c) { return !c.base && !c.outpost; });
-	ships.forEach(function(ship) {
-		p.combat += 1;
-		module.log.info(ship.name, " +1 Combat from Fleet HQ");
-	});
-}
-
 function processIfAtLeastTwoBases(card, p, notp) {
 	if (p.bases.length >= 2 && card.ifAtLeastTwoBases) {
 		module.log.info("At least two bases - triggering ability");
@@ -272,7 +264,7 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('discardThenDraw')) { processDiscardThenDraw(card, p); }
 	if (card.hasOwnProperty('scrapTradeRow')) { processScrapTradeRow(p); }
 	if (card.hasOwnProperty('drawCardForEachBlob')) { processDrawCardForEachBlob(p); }
-	if (card.hasOwnProperty('allShipsCombat')) { processAllShipsCombat(p); }
+	// allShipsCombat is now handled as continuous effect in playCard()
 	if (card.hasOwnProperty('ifAtLeastTwoBases')) { processIfAtLeastTwoBases(card, p, notp); }
 	if (card.hasOwnProperty('drawThenScrap')) { processDrawThenScrap(card, p); }
 	if (card.hasOwnProperty('scrapThenDraw')) { processScrapThenDraw(card, p); }
@@ -287,6 +279,17 @@ function playBase(card, p, notp) {
 function playCard(card, p, notp) {
     playCommon(card, p, notp);
 	moveCard(card, p.hand, p.inPlay);
+
+	// Apply Fleet HQ continuous effect: all ships get +1 combat while Fleet HQ is in play
+	if (!card.base && !card.outpost) {
+		// Check both p.bases (not yet moved) and p.inPlay (already moved) for Fleet HQ
+		var allBases = p.bases.concat(p.inPlay.filter(function(c) { return c.base || c.outpost; }));
+		var hasFleetHQ = allBases.some(function(b) { return b.hasOwnProperty('allShipsCombat'); });
+		if (hasFleetHQ) {
+			p.combat += 1;
+			module.log.info("Fleet HQ gives ", card.name, " +1 Combat");
+		}
+	}
 }
 
 function processCombat(p, notp) {

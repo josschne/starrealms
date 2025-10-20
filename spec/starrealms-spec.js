@@ -734,24 +734,54 @@ describe("drawCardForEachBlob ability", function() {
 	});
 });
 
-describe("allShipsCombat ability", function() {
+describe("allShipsCombat ability (Fleet HQ)", function() {
 	beforeEach(function() {
 		p = main.initPlayer();
 		notp = main.initPlayer();
 	});
 
-	it("gives +1 combat to all ships in play", function() {
-		var card = {allShipsCombat:1};
-		var ship1 = {name:'Ship1'};
-		var ship2 = {name:'Ship2'};
-		var base = {name:'Base', base:5};
+	it("gives +1 combat to ships played while Fleet HQ is in play", function() {
+		var fleetHQ = {name:'Fleet HQ', allShipsCombat:1, base:8};
+		var ship1 = {name:'Ship1', combat:2};
+		var ship2 = {name:'Ship2', combat:3};
 
-		p.hand = [card];
-		p.inPlay = [ship1, ship2, base];
+		// Fleet HQ starts in bases (already in play from previous turn)
+		p.bases = [fleetHQ];
+		p.hand = [ship1, ship2];
+		p.combat = 0;
 
-		main.playCard(card, p, notp);
+		// Play ships from hand - each should get +1 from Fleet HQ
+		main.playCard(ship1, p, notp);
+		expect(p.combat).toEqual(3); // 2 base + 1 from Fleet HQ
 
-		expect(p.combat).toEqual(2); // 2 ships * 1 combat each
+		main.playCard(ship2, p, notp);
+		expect(p.combat).toEqual(7); // 3 + (3 base + 1 from Fleet HQ)
+	});
+
+	it("does not affect bases or outposts", function() {
+		var fleetHQ = {name:'Fleet HQ', allShipsCombat:1, base:8};
+		var outpost = {name:'Outpost', combat:2, outpost:4};
+
+		p.bases = [fleetHQ];
+		p.hand = [outpost];
+		p.combat = 0;
+
+		main.playCard(outpost, p, notp);
+
+		// Outpost should not get bonus
+		expect(p.combat).toEqual(2); // Just the outpost's combat, no Fleet HQ bonus
+	});
+
+	it("does not affect ships if Fleet HQ is not in play", function() {
+		var ship = {name:'Ship', combat:2};
+
+		p.bases = [];
+		p.hand = [ship];
+		p.combat = 0;
+
+		main.playCard(ship, p, notp);
+
+		expect(p.combat).toEqual(2); // No Fleet HQ bonus
 	});
 });
 
