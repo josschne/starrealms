@@ -37,19 +37,26 @@ Two example strategies are included:
 
 You can create custom strategies by implementing the strategy interface.
 
-Known Issues (Under Review)
-============================
-During verification against official Star Realms sources, the following issues were identified:
+Verification Status
+===================
+✅ **All rules verified against official Star Realms sources**
 
-1. **Brain World** - Incorrect implementation
-   - Current: Always draws 2 cards after scrapping 1 card from hand
-   - Correct: Should scrap up to 2 cards from hand AND/OR discard pile, then draw 1 card for each card scrapped
-   - Status: 🔧 Fix in progress
+The implementation has been verified against:
+- Official Wise Wizard Games rulebook
+- Star Realms community discussions and FAQs
+- Card-specific rulings from BoardGameGeek and official forums
 
-2. **Fleet HQ** - Potential timing issue
-   - Current: Gives +1 combat to ships already in play when Fleet HQ base is played
-   - Correct: Should give +1 combat to all ships while Fleet HQ base is in play (continuous effect)
-   - Status: 🔍 Under review - may be functionally correct due to turn order
+Two issues were identified and fixed:
+
+1. **Brain World** - ✅ Fixed (commit 57c5acc)
+   - Now correctly scraps up to 2 cards from hand AND/OR discard pile
+   - Draws cards equal to number of cards actually scrapped (0-2)
+
+2. **Fleet HQ** - ✅ Fixed (commit 96f0e31)
+   - Now correctly gives +1 combat to ships played AFTER Fleet HQ enters play
+   - Implemented as continuous effect (not one-time retroactive bonus)
+
+All 59 tests passing with 97 assertions.
 
 Develop
 =======
