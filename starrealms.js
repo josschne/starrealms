@@ -27,7 +27,7 @@ function initPlayer(name, strategy)
 	if (!strategy) {
 		strategy = require('./strategies/dumb_strategy');
 	}
-	return {name:name, discard:[], bases:[], inPlay:[], scrap:[], discarding:0, combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[], strategy:strategy};
+	return {name:name, discard:[], bases:[], inPlay:[], scrap:[], discarding:0, combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[], strategy:strategy, nextShipToTop:false};
 }
 
 function initPlayerDeck() {
@@ -158,6 +158,7 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('copyShip')) { processCopyShip(p, notp); }
 	if (card.hasOwnProperty('scrapCard')) { processScrapCard(p.strategy.scrapCardStrategy(p), p); }
 	if (card.hasOwnProperty('destroyBase')) { processDestroyBase(p, notp); }
+	if (card.hasOwnProperty('nextShipToTop')) { p.nextShipToTop = true; module.log.info("Next ship to top of deck"); }
 }
 
 function playBase(card, p, notp) {
@@ -205,10 +206,26 @@ function processTrade(p, trade)
 	{
 		var cardToBuy = p.strategy.buyStrategy(toBuy);
 		if (cardToBuy === ExplorerCard) {
-			p.discard = p.discard.concat(ExplorerCard);
+			if (p.nextShipToTop) {
+				p.deck.putOnTopOfDeck([ExplorerCard]);
+				p.nextShipToTop = false;
+				module.log.info("Placed on top of deck");
+			} else {
+				p.discard = p.discard.concat(ExplorerCard);
+			}
 		} else {
-			moveCard(cardToBuy, trade.row, p.discard);
-			trade.row.push(trade.deck.draw(1));
+			if (p.nextShipToTop) {
+				// Remove from trade row
+				trade.row.splice(trade.row.indexOf(cardToBuy), 1);
+				// Put on top of deck
+				p.deck.putOnTopOfDeck([cardToBuy]);
+				p.nextShipToTop = false;
+				module.log.info("Placed on top of deck");
+				trade.row.push(trade.deck.draw(1));
+			} else {
+				moveCard(cardToBuy, trade.row, p.discard);
+				trade.row.push(trade.deck.draw(1));
+			}
 		}
 		p.trade -= cardToBuy.cost;
 		module.log.info("Aquired ", cardToBuy.name);

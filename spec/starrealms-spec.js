@@ -422,6 +422,96 @@ describe("destroyBase ability", function() {
 	});
 });
 
+describe("nextShipToTop ability", function() {
+	beforeEach(function() {
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("places the next bought card on top of the deck", function() {
+		var Shuffle = require('shuffle');
+		var nextShipCard = {nextShipToTop:1};
+		var cardToBuy = {name:'ToBuy', cost:2};
+		var existingCard = {name:'Existing'};
+
+		p.hand = [nextShipCard];
+		p.trade = 2;
+		p.deck = Shuffle.shuffle({deck: [existingCard]});
+		trade = main.initTrade();
+		trade.row = [cardToBuy];
+
+		main.playCard(nextShipCard, p, notp);
+		main.processTrade(p, trade);
+
+		// The bought card should be on top, so draw it first
+		expect(p.deck.draw(1)).toBe(cardToBuy);
+		// The existing card should be below it
+		expect(p.deck.draw(1)).toBe(existingCard);
+		expect(p.discard.length).toEqual(0);
+	});
+
+	it("places Explorer on top of deck when flag is set", function() {
+		var Shuffle = require('shuffle');
+		var nextShipCard = {nextShipToTop:1};
+		var existingCard = {name:'Existing'};
+
+		p.hand = [nextShipCard];
+		p.trade = 2;
+		p.deck = Shuffle.shuffle({deck: [existingCard]});
+		trade = main.initTrade();
+		trade.row = [{cost:100}]; // Too expensive, so Explorer will be bought
+
+		main.playCard(nextShipCard, p, notp);
+		main.processTrade(p, trade);
+
+		var topCard = p.deck.draw(1);
+		expect(topCard.name).toEqual("Explorer");
+		expect(p.discard.length).toEqual(0);
+	});
+
+	it("only affects the next ship bought", function() {
+		var Shuffle = require('shuffle');
+		var nextShipCard = {nextShipToTop:1};
+		var card1 = {name:'Card1', cost:1};
+		var card2 = {name:'Card2', cost:1};
+		var existingCard = {name:'Existing'};
+
+		p.hand = [nextShipCard];
+		p.trade = 2;
+		p.deck = Shuffle.shuffle({deck: [existingCard]});
+		trade = main.initTrade();
+		trade.row = [card1, card2];
+
+		main.playCard(nextShipCard, p, notp);
+		main.processTrade(p, trade);
+
+		// First card should be on top of deck
+		expect(p.deck.draw(1).name).toEqual('Card1');
+		// Second card should be in discard
+		expect(p.discard.length).toEqual(1);
+		expect(p.discard[0].name).toEqual('Card2');
+	});
+
+	it("works as an ally ability", function() {
+		var Shuffle = require('shuffle');
+		var allyCard1 = {faction:'A', trade:2};
+		var allyCard2 = {faction:'A', allyAbilities:{nextShipToTop:1}};
+		var cardToBuy = {name:'ToBuy', cost:2};
+		var existingCard = {name:'Existing'};
+
+		p.hand = [allyCard1, allyCard2];
+		p.deck = Shuffle.shuffle({deck: [existingCard]});
+		trade = main.initTrade();
+		trade.row = [cardToBuy];
+
+		main.playCard(allyCard1, p, notp);
+		main.playCard(allyCard2, p, notp);
+		main.processTrade(p, trade);
+
+		expect(p.deck.draw(1)).toBe(cardToBuy);
+	});
+});
+
 describe("A game", function() {
 	it("can be played without crashing", function() {
 		main.runGame(undefined, require('./strategy'), require('./strategy'));
