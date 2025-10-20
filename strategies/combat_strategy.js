@@ -5,6 +5,7 @@ module.exports = {
 	copyShipStrategy: copyShipStrategy,
     scrapStrategy: scrapStrategy,
     scrapCardStrategy: scrapCardStrategy,
+    destroyBaseStrategy: destroyBaseStrategy,
 }
 
 function orStrategy(card)
@@ -55,4 +56,15 @@ function scrapStrategy(card, p, notp)
 function scrapCardStrategy(p) {
 	var toDiscard = p.discard.filter(function(card) { return card.name == "Scout"; });
 	return toDiscard[0];
+}
+
+function destroyBaseStrategy(opponentBases) {
+	// Prioritize destroying outposts first (they block attacks)
+	var outposts = opponentBases.filter(function(b) { return b.hasOwnProperty('outpost'); });
+	if (outposts.length > 0) {
+		// Sort by health and destroy the strongest outpost first
+		return outposts.sort(function(a, b) { return b.outpost - a.outpost; })[0];
+	}
+	// Otherwise destroy any base
+	return opponentBases[0];
 }

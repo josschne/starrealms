@@ -345,6 +345,83 @@ describe("A player", function() {
 	});
 });
 
+describe("destroyBase ability", function() {
+	beforeEach(function() {
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("destroys an opponent's base", function() {
+		var baseToDestroy = {name:'Base1', base:5};
+		var destroyBaseCard = {destroyBase:1};
+
+		p.hand = [destroyBaseCard];
+		notp.bases = [baseToDestroy];
+
+		main.playCard(destroyBaseCard, p, notp);
+
+		expect(notp.bases.length).toEqual(0);
+		expect(notp.discard.length).toEqual(1);
+		expect(notp.discard[0]).toBe(baseToDestroy);
+	});
+
+	it("destroys an opponent's outpost", function() {
+		var outpostToDestroy = {name:'Outpost1', outpost:4};
+		var destroyBaseCard = {destroyBase:1};
+
+		p.hand = [destroyBaseCard];
+		notp.bases = [outpostToDestroy];
+
+		main.playCard(destroyBaseCard, p, notp);
+
+		expect(notp.bases.length).toEqual(0);
+		expect(notp.discard.length).toEqual(1);
+		expect(notp.discard[0]).toBe(outpostToDestroy);
+	});
+
+	it("does nothing if opponent has no bases", function() {
+		var destroyBaseCard = {destroyBase:1};
+
+		p.hand = [destroyBaseCard];
+		notp.bases = [];
+
+		main.playCard(destroyBaseCard, p, notp);
+
+		expect(notp.bases.length).toEqual(0);
+		expect(notp.discard.length).toEqual(0);
+	});
+
+	it("works as a scrap ability", function() {
+		var baseToDestroy = {name:'Base1', base:5};
+		var cardWithScrapAbility = {name:'Battlecruiser', scrapAbilities:{destroyBase:1}};
+
+		p.inPlay = [cardWithScrapAbility];
+		p.strategy.scrapStrategy = function(card) { return card; };
+		notp.bases = [baseToDestroy];
+
+		main.processScrap(p, notp);
+
+		expect(notp.bases.length).toEqual(0);
+		expect(notp.discard.length).toEqual(1);
+		expect(p.scrap.length).toEqual(1);
+	});
+
+	it("works as an ally ability", function() {
+		var baseToDestroy = {name:'Base1', base:5};
+		var allyCard1 = {faction:'A'};
+		var allyCard2 = {faction:'A', allyAbilities:{destroyBase:1}};
+
+		p.hand = [allyCard1, allyCard2];
+		notp.bases = [baseToDestroy];
+
+		main.playCard(allyCard1, p, notp);
+		main.playCard(allyCard2, p, notp);
+
+		expect(notp.bases.length).toEqual(0);
+		expect(notp.discard.length).toEqual(1);
+	});
+});
+
 describe("A game", function() {
 	it("can be played without crashing", function() {
 		main.runGame(undefined, require('./strategy'), require('./strategy'));

@@ -125,6 +125,16 @@ function processCopyShip(p, notp) {
 	}
 }
 
+function processDestroyBase(p, notp) {
+	if (notp.bases.length > 0) {
+		var baseToDestroy = p.strategy.destroyBaseStrategy(notp.bases);
+		if (baseToDestroy && notp.bases.indexOf(baseToDestroy) > -1) {
+			module.log.info("Destroy Base: "+baseToDestroy.name);
+			moveCard(baseToDestroy, notp.bases, notp.discard);
+		}
+	}
+}
+
 function processOr(card, p, notp) {
 	card.or.forEach(function(a) { a.name = "Or: " + card.name }); 
 	var orChoice = p.strategy.orStrategy(card); 
@@ -147,6 +157,7 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('opponentDiscard')) { notp.discarding += card.opponentDiscard; }
 	if (card.hasOwnProperty('copyShip')) { processCopyShip(p, notp); }
 	if (card.hasOwnProperty('scrapCard')) { processScrapCard(p.strategy.scrapCardStrategy(p), p); }
+	if (card.hasOwnProperty('destroyBase')) { processDestroyBase(p, notp); }
 }
 
 function playBase(card, p, notp) {

@@ -6,12 +6,12 @@
   "dependencies": {
     "extendify": "~0.1.0",
     "growl": "~1.8.1",
+    "jasmine-node": "^3.0.0",
     "lodash": "~2.4.1",
     "readline-sync": "~0.4.8",
     "shuffle": "https://registry.npmjs.org/shuffle/-/shuffle-0.2.2.tgz",
     "winston": "^0.8.1"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "jasmine-node spec"
   },
