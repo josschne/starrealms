@@ -27,7 +27,7 @@ function initPlayer(name, strategy)
 	if (!strategy) {
 		strategy = require('./strategies/dumb_strategy');
 	}
-	return {name:name, discard:[], bases:[], inPlay:[], scrap:[], discarding:0, combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[], strategy:strategy, nextShipToTop:false};
+	return {name:name, discard:[], bases:[], inPlay:[], scrap:[], discarding:0, combat:0, trade:0, deck:initPlayerDeck(), authority:50, hand:[], strategy:strategy, nextShipToTop:false, nextShipNoCost:false};
 }
 
 function initPlayerDeck() {
@@ -194,6 +194,7 @@ function playCommon(card, p, notp) {
 	if (card.hasOwnProperty('scrapCard')) { processScrapCard(p.strategy.scrapCardStrategy(p), p); }
 	if (card.hasOwnProperty('destroyBase')) { processDestroyBase(p, notp); }
 	if (card.hasOwnProperty('nextShipToTop')) { p.nextShipToTop = true; module.log.info("Next ship to top of deck"); }
+	if (card.hasOwnProperty('nextShipNoCost')) { p.nextShipNoCost = true; module.log.info("Next ship no cost"); }
 	if (card.hasOwnProperty('discardThenDraw')) { processDiscardThenDraw(card, p); }
 	if (card.hasOwnProperty('scrapTradeRow')) { processScrapTradeRow(p); }
 }
@@ -238,10 +239,12 @@ function processCombat(p, notp) {
 function processTrade(p, trade)
 {
 	var ExplorerCard = {name:"Explorer", trade:2, cost:2, scrapAbilities:{combat:2}};
-	var toBuy = trade.row.concat(ExplorerCard).filter(function(card) { return (card.cost <= p.trade)});
+	var toBuy = trade.row.concat(ExplorerCard).filter(function(card) { return (p.nextShipNoCost || card.cost <= p.trade)});
 	while(toBuy.length > 0 && trade.deck.length > 0)
 	{
 		var cardToBuy = p.strategy.buyStrategy(toBuy);
+		var costToPay = p.nextShipNoCost ? 0 : cardToBuy.cost;
+
 		if (cardToBuy === ExplorerCard) {
 			if (p.nextShipToTop) {
 				p.deck.putOnTopOfDeck([ExplorerCard]);
@@ -264,10 +267,16 @@ function processTrade(p, trade)
 				trade.row.push(trade.deck.draw(1));
 			}
 		}
-		p.trade -= cardToBuy.cost;
+
+		if (p.nextShipNoCost) {
+			p.nextShipNoCost = false;
+			module.log.info("Free card!");
+		}
+
+		p.trade -= costToPay;
 		module.log.info("Aquired ", cardToBuy.name);
-        module.log.info("-", cardToBuy.cost, " Trade (Trade:", p.trade,")");
-		toBuy = trade.row.concat(ExplorerCard).filter(function(card) { return (card.cost <= p.trade)});
+        module.log.info("-", costToPay, " Trade (Trade:", p.trade,")");
+		toBuy = trade.row.concat(ExplorerCard).filter(function(card) { return (p.nextShipNoCost || card.cost <= p.trade)});
 	}
 	p.trade = 0;
 }

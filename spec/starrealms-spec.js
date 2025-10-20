@@ -645,6 +645,71 @@ describe("scrapTradeRow ability", function() {
 	});
 });
 
+describe("nextShipNoCost ability", function() {
+	beforeEach(function() {
+		p = main.initPlayer();
+		notp = main.initPlayer();
+	});
+
+	it("makes the next purchased card free", function() {
+		var Shuffle = require('shuffle');
+		var freeCard = {nextShipNoCost:1};
+		var expensiveCard = {name:'Expensive', cost:10};
+
+		p.hand = [freeCard];
+		p.trade = 0;
+		p.deck = Shuffle.shuffle({deck: []});
+		trade = main.initTrade();
+		trade.row = [expensiveCard];
+
+		main.playCard(freeCard, p, notp);
+		main.processTrade(p, trade);
+
+		// Should have bought the card despite having 0 trade
+		expect(p.discard.length).toEqual(1);
+		expect(p.discard[0]).toBe(expensiveCard);
+		expect(p.trade).toEqual(0);
+	});
+
+	it("only affects the next ship bought", function() {
+		var Shuffle = require('shuffle');
+		var freeCard = {nextShipNoCost:1, trade:5};
+		var card1 = {name:'Card1', cost:10};
+		var card2 = {name:'Card2', cost:5};
+
+		p.hand = [freeCard];
+		p.deck = Shuffle.shuffle({deck: []});
+		trade = main.initTrade();
+		trade.row = [card1, card2];
+
+		main.playCard(freeCard, p, notp);
+		main.processTrade(p, trade);
+
+		// Should have bought both cards (first free, second costs 5)
+		expect(p.discard.length).toEqual(2);
+		expect(p.trade).toEqual(0);
+	});
+
+	it("works as an ally ability", function() {
+		var Shuffle = require('shuffle');
+		var allyCard1 = {faction:'A', trade:0};
+		var allyCard2 = {faction:'A', allyAbilities:{nextShipNoCost:1}};
+		var expensiveCard = {name:'Expensive', cost:10};
+
+		p.hand = [allyCard1, allyCard2];
+		p.deck = Shuffle.shuffle({deck: []});
+		trade = main.initTrade();
+		trade.row = [expensiveCard];
+
+		main.playCard(allyCard1, p, notp);
+		main.playCard(allyCard2, p, notp);
+		main.processTrade(p, trade);
+
+		expect(p.discard.length).toEqual(1);
+		expect(p.discard[0]).toBe(expensiveCard);
+	});
+});
+
 describe("A game", function() {
 	it("can be played without crashing", function() {
 		main.runGame(undefined, require('./strategy'), require('./strategy'));
